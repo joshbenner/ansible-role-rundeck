@@ -1,0 +1,70 @@
+---
+_rundeck_conditionl_packages:
+  - name: rundeck-cli
+    condition: "{{ rundeck_install_cli }}"
+  - name: python-lxml
+    condition: "{{ rundeck_set_session_timeout }}"
+  - name: openssl
+    condition: "{{ rundeck_enable_ssl }}"
+_rundeck_conditional_packages_to_install: "{{ _rundeck_conditionl_packages | selectattr('condition') | map(attribute='name') | list }}"
+_rundeck_package: rundeck{{ '=' + rundeck_version if rundeck_version|length else '' }}
+_rundeck_packages: "{{ [_rundeck_package] + _rundeck_conditional_packages_to_install }}"
+
+# These might become customizable in a later version of the role.
+rundeck_config_dir: /etc/rundeck
+rundeck_base_dir: /var/lib/rundeck
+rundeck_projects_dir: /var/rundeck/projects
+rundeck_user: rundeck
+rundeck_group: rundeck
+rundeck_ssl_dir: "{{ rundeck_config_dir }}/ssl"
+rundeck_keystore: "{{ rundeck_ssl_dir }}/keystore"
+rundeck_truststore: "{{ rundeck_ssl_dir }}/truststore"
+
+_rundeck_config:
+  rdeck:
+    base: "{{ rundeck_base_dir }}"
+  rss:
+    enabled: "{{ 'true' if rundeck_rss_enabled else 'false' }}"
+  rundeck:
+    executionMode: "{{ rundeck_execution_mode }}"
+  pagination:
+    default:
+      max: "{{ rundeck_pagination_default }}"
+  loglevel:
+    default: "{{ rundeck_loglevel_default }}"
+  grails:
+    serverURL: "{{ rundeck_external_url }}"
+  dataSource:
+    dbCreate: update
+    url: jdbc:h2:file:{{ rundeck_base_dir }}/data/rundeckdb;MVCC=true
+
+_rundeck_framework:
+  rdeck:
+    base: "{{ rundeck_base_dir }}"
+  rundeck:
+    server:
+      uuid: "{{ _rundeck_uuid }}"
+      url: "{{ rundeck_external_url }}"
+  framework:
+    globals: "{{ rundeck_globals }}"
+    server:
+      name: "{{ rundeck_server_name }}"
+      hostname: localhost
+      port: "{{ rundeck_https_port if rundeck_enable_ssl else rundeck_http_port }}"
+      url: "{{ rundeck_external_url }}"
+    ssh:
+      keypath: "{{ rundeck_base_dir }}/.ssh/id_rsa"
+      user: "{{ rundeck_user }}"
+      timeout: 0
+    projects:
+      dir: "{{ rundeck_projects_dir }}"
+    etc:
+      dir: "{{ rundeck_config_dir }}"
+    var:
+      dir: "{{ rundeck_base_dir }}/var"
+    tmp:
+      dir: "{{ rundeck_base_dir }}/var/tmp"
+    logs:
+      dir: "{{ rundeck_base_dir }}/logs"
+    libext:
+      dir: "{{ rundeck_base_dir }}/libext"

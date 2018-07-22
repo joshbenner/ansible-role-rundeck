@@ -1,0 +1,14 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: ../../..
+      rundeck_version: 2.11.5
+      rundeck_globals:
+        foo: bar
+      rundeck_session_timeout: 60
+      rundeck_enable_ssl: true
+      rundeck_cli_insecure_ssl: true
+      rundeck_ssl_cert_path: /etc/ssl/certs/ssl-cert-snakeoil.pem
+      rundeck_ssl_key_path: /etc/ssl/private/ssl-cert-snakeoil.key
+      rundeck_external_url: https://localhost:4430

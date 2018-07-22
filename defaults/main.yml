@@ -1,0 +1,68 @@
+---
+# Whether to install the apt https transport. If this is installed elsewhere in
+# your automation, disabling this saves a little time.
+rundeck_install_apt_transport_https: true
+
+# Apt repo configuration.
+rundeck_install_apt_key: true
+rundeck_apt_key_url: https://bintray.com/user/downloadSubjectPublicKey?username=bintray
+rundeck_install_apt_repo: true
+rundeck_apt_repo: deb https://rundeck.bintray.com/rundeck-deb /
+
+# Pinning the version prevents unexpected/accidental upgrades. Pinning only
+# works if a specific version is specified using the rundeck_version variable.
+rundeck_pin_version: "{{ rundeck_version|length > 0 }}"
+
+# The version is blank by default. This means that whichever version apt chooses
+# by default is what will be installed. Set to a specific version as needed.
+rundeck_version: ""
+
+# URL to access Rundeck
+rundeck_external_url: http{{ 's' if rundeck_enable_ssl else '' }}://{{ ansible_fqdn }}:{{ rundeck_https_port if rundeck_enable_ssl else rundeck_http_port }}
+
+# Name (identity) of the Rundeck server node
+rundeck_server_name: "{{ ansible_fqdn }}"
+
+rundeck_install_cli: true
+rundeck_cli_user: "{{ ansible_facts.user_id }}"
+rundeck_cli_insecure_ssl: false
+
+# Set execution mode to 'active' or 'passive' (no jobs can be run)
+rundeck_execution_mode: active
+# Default paginator per-page value
+rundeck_pagination_default: 20
+# Default log level for jobs: ERROR, WARN, INFO, VERBOSE, DEBUG
+rundeck_loglevel_default: INFO
+# if set to true enables RSS feeds that are public (non-authenticated)
+rundeck_rss_enabled: false
+
+# Any additional config or overrides. See _rundeck_config in vars/main.yml
+rundeck_extra_config: {}
+
+# Static globals to expose to all jobs in ${globals.*}
+rundeck_globals: {}
+# myvar: myvalue
+# othervar: othervalue
+
+# Disable if you don't want to change session timeout. Might be useful if
+# installing lxml on remote host isn't desired or possible.
+rundeck_set_session_timeout: true
+rundeck_session_timeout: 30
+
+rundeck_http_port: 4440
+rundeck_https_port: 4430
+
+# Java memory configuration
+rundeck_initial_heap_size: 256m
+rundeck_maximum_heap_size: 1024m
+rundeck_maximum_metaspace_size: 256m
+
+rundeck_open_file_limit: 65535
+
+rundeck_enable_ssl: false
+rundeck_ssl_cert_path: "{{ rundeck_config_dir }}/ssl/cert.pem"
+rundeck_ssl_key_path: "{{ rundeck_config_dir }}/ssl/key.pem"
+
+# If these contain the cert/key bytes, they will be written to the paths above.
+rundeck_ssl_cert: ''
+rundeck_ssl_key: ''

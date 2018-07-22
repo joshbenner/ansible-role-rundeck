@@ -1,0 +1,51 @@
+---
+- name: Write SSL cert & key
+  copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}"
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_group }}"
+    mode: u=rw,g=,o=
+  loop:
+    - dest: "{{ rundeck_ssl_cert_path }}"
+      content: "{{ rundeck_ssl_cert }}"
+    - dest: "{{ rundeck_ssl_key_path }}"
+      content: "{{ rundeck_ssl_key }}"
+  when:
+    - rundeck_ssl_cert|length
+    - rundeck_ssl_key|length
+
+- name: Convert PEM files to PKCS12 format
+  command: |
+    openssl pkcs12 -export -out {{ rundeck_ssl_dir }}/cert.p12
+    -inkey {{ rundeck_ssl_key_path }}
+    -in {{ rundeck_ssl_cert_path }}
+    -passout pass:adminadmin
+    -name rundeck
+  changed_when: false
+
+- name: Generate Rundeck keystore
+  java_cert:
+    pkcs12_path: "{{ rundeck_ssl_dir }}/cert.p12"
+    pkcs12_password: adminadmin
+    pkcs12_alias: rundeck
+    cert_alias: rundeck
+    keystore_path: "{{ rundeck_keystore }}"
+    keystore_pass: adminadmin
+    keystore_create: yes
+    state: present
+  notify: restart rundeck
+
+- name: Set keystore permissions
+  file:
+    path: "{{ rundeck_keystore }}"
+    state: file
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_group }}"
+    mode: u=rw,g=r,o=
+
+- name: Link truststore to keystore
+  file:
+    src: "{{ rundeck_keystore }}"
+    dest: "{{ rundeck_truststore }}"
+    state: link

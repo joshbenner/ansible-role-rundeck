@@ -1,0 +1,13 @@
+#jinja2: lstrip_blocks: True
+# {{ ansible_managed }}
+{% macro property(key, value) -%}
+  {% if value is mapping -%}
+    {% for childkey, childval in value|dictsort -%}
+      {{ property(((key + '.') if key|length else '') + childkey, childval) }}
+    {%- endfor %}
+  {%- else -%}
+    {{ key }}={{ value|string + '\n' }}
+  {% endif %}
+{% endmacro -%}
+
+{{ property('', properties) }}

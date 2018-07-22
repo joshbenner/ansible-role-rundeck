@@ -1,0 +1,17 @@
+---
+galaxy_info:
+  author: Josh Benner
+  description: Install and configure Rundeck
+  license: BSD
+  min_ansible_version: 2.5
+  platforms:
+    - name: Ubuntu
+      versions:
+        - xenial
+
+  galaxy_tags:
+    - automation
+    - rundeck
+    - workflow
+
+dependencies: []

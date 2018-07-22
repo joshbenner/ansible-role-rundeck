@@ -1,0 +1,18 @@
+---
+- name: Install for Debian family
+  include_tasks: install_debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Configure Rundeck
+  include_tasks: configure.yml
+
+# Flush first so that if a restart is pending, we don't start and immediately
+# restart upon initial install.
+- name: Flush pending handlers
+  meta: flush_handlers
+
+- name: Enable Rundeck service
+  service:
+    name: rundeckd
+    state: started
+    enabled: yes
