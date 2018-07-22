@@ -59,6 +59,10 @@ rundeck_maximum_metaspace_size: 256m
 
 rundeck_open_file_limit: 65535
 
+# Include paths to certs to be trusted by Rundeck.
+rundeck_trust_certs: {}
+# ldap: /path/to/cert.pem
+
 rundeck_enable_ssl: false
 rundeck_ssl_cert_path: "{{ rundeck_config_dir }}/ssl/cert.pem"
 rundeck_ssl_key_path: "{{ rundeck_config_dir }}/ssl/key.pem"
@@ -66,3 +70,31 @@ rundeck_ssl_key_path: "{{ rundeck_config_dir }}/ssl/key.pem"
 # If these contain the cert/key bytes, they will be written to the paths above.
 rundeck_ssl_cert: ''
 rundeck_ssl_key: ''
+
+rundeck_enable_ldap: false
+rundeck_ldap_debug: false
+rundeck_ldap_url: ldap://server:389
+
+rundeck_ldap_auth_method: simple
+rundeck_ldap_user_base_dn: ou=People,dc=test1,dc=example,dc=com
+rundeck_ldap_user_rdn_attr: uid
+rundeck_ldap_user_id_attr: uid
+rundeck_ldap_user_password_attr: userPassword
+rundeck_ldap_user_object_class: inetOrgPerson
+rundeck_ldap_role_base_dn: ou=Groups,dc=test1,dc=example,dc=com
+rundeck_ldap_role_name_attr: cn
+# rundeck_ldap_username_member_attr: memberUid
+rundeck_ldap_role_member_attr: uniqueMember
+rundeck_ldap_role_object_class: groupOfUniqueNames
+rundeck_ldap_nested_groups: false
+rundeck_ldap_role_prefix: ''
+
+rundeck_ldap_cache_duration_millis: 300000
+rundeck_ldap_supplemental_roles: user
+rundeck_ldap_report_stats: true
+rundeck_ldap_timeout_read: 10000
+rundeck_ldap_timeout_connect: 20000
+
+rundeck_ldap_binding_login: true
+rundeck_ldap_bind_dn: cn=Manager,dc=example,dc=com
+rundeck_ldap_bind_password: sekrit

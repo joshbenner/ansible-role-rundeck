@@ -43,9 +43,3 @@
     owner: "{{ rundeck_user }}"
     group: "{{ rundeck_group }}"
     mode: u=rw,g=r,o=
-
-- name: Link truststore to keystore
-  file:
-    src: "{{ rundeck_keystore }}"
-    dest: "{{ rundeck_truststore }}"
-    state: link

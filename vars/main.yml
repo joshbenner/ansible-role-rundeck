@@ -5,7 +5,7 @@ _rundeck_conditionl_packages:
   - name: python-lxml
     condition: "{{ rundeck_set_session_timeout }}"
   - name: openssl
-    condition: "{{ rundeck_enable_ssl }}"
+    condition: "{{ rundeck_enable_ssl or rundeck_trust_certs|length }}"
 _rundeck_conditional_packages_to_install: "{{ _rundeck_conditionl_packages | selectattr('condition') | map(attribute='name') | list }}"
 _rundeck_package: rundeck{{ '=' + rundeck_version if rundeck_version|length else '' }}
 _rundeck_packages: "{{ [_rundeck_package] + _rundeck_conditional_packages_to_install }}"

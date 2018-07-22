@@ -73,6 +73,19 @@
     mode: u=rw,g=,o=
   when: rundeck_install_cli
 
+- name: Configure LDAP
+  template:
+    src: jaas-ldap.conf.j2
+    dest: "{{ rundeck_config_dir }}/jaas-ldap.conf"
+    owner: "{{ rundeck_cli_user }}"
+    group: "{{ rundeck_cli_user }}"
+    mode: u=rwx,g=,o=
+  when: rundeck_enable_ldap
+
 - name: Configure SSL
   include_tasks: ssl.yml
   when: rundeck_enable_ssl
+
+- name: Configure trusted certs
+  include_tasks: trust.yml
+  when: rundeck_trust_certs|length or rundeck_enable_ssl

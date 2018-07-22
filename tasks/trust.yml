@@ -1,0 +1,44 @@
+---
+- name: Trust SSL cert
+  java_cert:
+    pkcs12_path: "{{ rundeck_ssl_dir }}/cert.p12"
+    pkcs12_password: adminadmin
+    pkcs12_alias: rundeck
+    cert_alias: rundeck
+    keystore_path: "{{ rundeck_truststore }}"
+    keystore_pass: adminadmin
+    keystore_create: yes
+    state: present
+  when: rundeck_enable_ssl
+  notify: restart rundeck
+
+- name: Import certificates to trust
+  include_tasks: import_cert.yml
+  loop: "{{ rundeck_trust_certs | dict2items }}"
+  loop_control:
+    loop_var: cert
+
+- name: Set trust permissions
+  file:
+    path: "{{ rundeck_truststore }}"
+    state: file
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_group }}"
+    mode: u=rw,g=r,o=
+
+- name: Get list of certs in truststore
+  shell: >-
+    keytool -list -v -keystore {{ rundeck_truststore }} -storepass adminadmin
+    | grep 'Alias name'
+    | awk -F ': ' '{print $2}'
+  register: _truststore_aliases
+  changed_when: false
+
+- name: Remove unwanted certs from truststore
+  java_cert:
+    cert_alias: "{{ item }}"
+    state: absent
+    keystore_path: "{{ rundeck_truststore }}"
+    keystore_pass: adminadmin
+  loop: "{{ _truststore_aliases.stdout_lines }}"
+  when: item not in (['rundeck'] + rundeck_trust_certs.keys())

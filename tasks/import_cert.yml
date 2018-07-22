@@ -1,0 +1,41 @@
+---
+- name: Set cert vars
+  set_fact:
+    _cert_name: "{{ cert.key }}"
+    _cert_path: "{{ cert.value }}"
+
+- name: Check cert to import
+  stat:
+    path: "{{ _cert_path }}"
+    get_attributes: false
+    get_checksum: true
+    get_mime: false
+  register: _cert_stat
+
+- name: Set cert vars
+  set_fact:
+    _der_path: "{{ rundeck_ssl_dir }}/{{ _cert_name }}-{{ _cert_stat.stat.checksum }}.der"
+    _is_der: "{{ (cert.value|lower).endswith('.der') }}"
+
+- name: Convert PEM certs to DER
+  command: openssl x509 -outform der -in {{ _cert_path }} -out {{ _der_path }}
+  args:
+    creates: "{{ _der_path }}"
+  when: not _is_der
+
+- name: Copy DER cert into position
+  copy:
+    remote_src: true
+    src: "{{ _cert_path }}"
+    dest: "{{ _der_path }}"
+  when: _is_der
+
+- name: Trust cert '{{ _cert_name }}'
+  java_cert:
+    cert_path: "{{ _der_path }}"
+    cert_alias: "{{ _cert_name }}"
+    keystore_path: "{{ rundeck_truststore }}"
+    keystore_pass: adminadmin
+    keystore_create: yes
+    state: present
+  notify: restart rundeck

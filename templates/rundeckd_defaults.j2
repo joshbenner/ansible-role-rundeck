@@ -9,5 +9,9 @@ RDECK_HTTPS_PORT="{{ rundeck_https_port }}"
 {% if rundeck_enable_ssl -%}
 RUNDECK_WITH_SSL="true"
 {%- endif %}
+{% if rundeck_enable_ldap %}
+LOGIN_MODULE=ldap
+JAAS_CONF={{ rundeck_config_dir }}/jaas-ldap.conf
+{% endif %}
 
 ulimit -n {{ rundeck_open_file_limit }}

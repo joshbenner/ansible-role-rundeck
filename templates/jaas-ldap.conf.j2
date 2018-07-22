@@ -1,0 +1,32 @@
+ldap {
+    com.dtolabs.rundeck.jetty.jaas.JettyCachingLdapLoginModule required
+    debug="{{ 'true' if rundeck_ldap_debug else 'false' }}"
+    contextFactory="com.sun.jndi.ldap.LdapCtxFactory"
+    providerUrl="{{ rundeck_ldap_url }}"
+{% if not rundeck_ldap_binding_login %}
+    bindDn="{{ rndeck_ldap_bind_dn }}"
+    bindPassword="{{ rundeck_ldap_bind_password}}"
+    userPasswordAttribute="{{ rundeck_ldap_user_password_attr }}"
+{% endif %}
+    authenticationMethod="{{ rundeck_ldap_auth_method }}"
+    forceBindingLogin="{{ 'true' if rundeck_ldap_binding_login else 'false' }}"
+    userBaseDn="{{ rundeck_ldap_user_base_dn }}"
+    userRdnAttribute="{{ rundeck_ldap_user_rdn_attr }}"
+    userIdAttribute="{{ rundeck_ldap_user_id_attr }}"
+    userObjectClass="{{ rundeck_ldap_user_object_class }}"
+    roleBaseDn="{{ rundeck_ldap_role_base_dn }}"
+    roleNameAttribute="{{ rundeck_ldap_role_name_attr }}"
+    rolePrefix="{{ rundeck_ldap_role_prefix }}"
+{% if rundeck_ldap_username_member_attr is defined %}
+    roleUsernameMemberAttribute="{{ rundeck_ldap_username_member_attr }}"
+{% else %}
+    roleMemberAttribute="{{ rundeck_ldap_role_member_attr }}"
+{% endif %}
+    roleObjectClass="{{ rundeck_ldap_role_object_class }}"
+    cacheDurationMillis="{{ rundeck_ldap_cache_duration_millis }}"
+    supplementalRoles="{{ rundeck_ldap_supplemental_roles }}"
+    reportStatistics="{{ 'true' if rundeck_ldap_report_stats else 'false' }}"
+    timeoutRead="{{ rundeck_ldap_timeout_read }}"
+    timeoutConnect="{{ rundeck_ldap_timeout_connect }}"
+    nestedGroups="{{ rundeck_ldap_nested_groups }}";
+};
