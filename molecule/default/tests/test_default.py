@@ -17,9 +17,14 @@ def test_rundeck_service(host):
     assert service.is_running
     assert service.is_enabled
 
+
 def test_trusted_cert(host):
     out = host.check_output('keytool -list '
                             '-keystore /etc/rundeck/ssl/truststore '
                             '-storepass adminadmin')
     assert 'snakeoil' in out
     assert 'rundeck' in out
+
+
+def test_ssh_key(host):
+    assert host.file('/var/lib/rundeck/.ssh/id_rsa').exists

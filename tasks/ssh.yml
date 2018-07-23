@@ -1,0 +1,16 @@
+---
+- name: Make sure Rundeck .ssh dir exists
+  file:
+    path: "{{ rundeck_base_dir }}/.ssh"
+    state: directory
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_group }}"
+    mode: u=rwx,g=,o=
+
+- name: Write Rundeck private key
+  copy:
+    dest: "{{ rundeck_base_dir }}/.ssh/id_rsa"
+    content: "{{ rundeck_ssh_private_key }}"
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_group }}"
+    mode: u=r,g=,o=

@@ -82,6 +82,10 @@
     mode: u=rwx,g=,o=
   when: rundeck_enable_ldap
 
+- name: Configure SSH
+  include_tasks: ssh.yml
+  when: rundeck_ssh_private_key|length
+
 - name: Configure SSL
   include_tasks: ssl.yml
   when: rundeck_enable_ssl
