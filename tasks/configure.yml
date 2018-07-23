@@ -82,6 +82,17 @@
     mode: u=rwx,g=,o=
   when: rundeck_enable_ldap
 
+- name: Write static tokens
+  copy:
+    dest: "{{ rundeck_static_tokens_file }}"
+    content: |
+      # Ansible managed
+      {% for token in rundeck_static_tokens %}
+      {{ token.user }}: {{ token.token }}
+      {% endfor %}
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_group }}"
+
 - name: Configure SSH
   include_tasks: ssh.yml
   when: rundeck_ssh_private_key|length

@@ -19,6 +19,7 @@ rundeck_group: rundeck
 rundeck_ssl_dir: "{{ rundeck_config_dir }}/ssl"
 rundeck_keystore: "{{ rundeck_ssl_dir }}/keystore"
 rundeck_truststore: "{{ rundeck_ssl_dir }}/truststore"
+rundeck_static_tokens_file: "{{ rundeck_config_dir }}/tokens.properties"
 
 _rundeck_config:
   rdeck:
@@ -45,6 +46,8 @@ _rundeck_framework:
     server:
       uuid: "{{ _rundeck_uuid }}"
       url: "{{ rundeck_external_url }}"
+    tokens:
+      file: "{{ rundeck_static_tokens_file }}"
   framework:
     globals: "{{ rundeck_globals }}"
     server:
