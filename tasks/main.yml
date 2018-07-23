@@ -11,6 +11,7 @@
     owner: "{{ rundeck_user }}"
     group: "{{ rundeck_group }}"
     mode: u=rw,g=r,o=r
+  loop: "{{ rundeck_plugins }}"
   notify: restart rundeck
 
 - name: Configure Rundeck
