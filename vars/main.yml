@@ -3,11 +3,11 @@ _rundeck_conditionl_packages:
   - name: openjdk-8-jre-headless
     condition: "{{ rundeck_install_java }}"
   - name: rundeck-cli
-    condition: "{{ rundeck_install_cli }}"
+    condition: "{{ rundeck_cli_enable }}"
   - name: python-lxml
     condition: "{{ rundeck_set_session_timeout }}"
   - name: openssl
-    condition: "{{ rundeck_enable_ssl or rundeck_trust_certs|length }}"
+    condition: "{{ rundeck_ssl_enable or rundeck_trust_certs|length }}"
 _rundeck_conditional_packages_to_install: "{{ _rundeck_conditionl_packages | selectattr('condition') | map(attribute='name') | list }}"
 _rundeck_package: rundeck{{ '=' + rundeck_version if rundeck_version|length else '' }}
 _rundeck_packages: "{{ [_rundeck_package] + _rundeck_conditional_packages_to_install }}"
@@ -60,7 +60,7 @@ _rundeck_framework:
     server:
       name: "{{ rundeck_server_name }}"
       hostname: localhost
-      port: "{{ rundeck_https_port if rundeck_enable_ssl else rundeck_http_port }}"
+      port: "{{ rundeck_https_port if rundeck_ssl_enable else rundeck_http_port }}"
       url: "{{ rundeck_external_url }}"
     ssh:
       keypath: "{{ rundeck_base_dir }}/.ssh/id_rsa"

@@ -57,7 +57,7 @@
     owner: "{{ rundeck_cli_user }}"
     group: "{{ rundeck_cli_user }}"
     mode: u=rwx,g=,o=
-  when: rundeck_enable_ldap
+  when: rundeck_ldap_enable
 
 - name: Write static tokens
   copy:
@@ -77,11 +77,11 @@
 
 - name: Configure SSL
   include_tasks: ssl.yml
-  when: rundeck_enable_ssl
+  when: rundeck_ssl_enable
 
 - name: Configure trusted certs
   include_tasks: trust.yml
-  when: rundeck_trust_certs|length or rundeck_enable_ssl
+  when: rundeck_trust_certs|length or rundeck_ssl_enable
 
 - name: Configure access control
   include_tasks: acl.yml

@@ -9,7 +9,7 @@
     keystore_pass: adminadmin
     keystore_create: yes
     state: present
-  when: rundeck_enable_ssl
+  when: rundeck_ssl_enable
   notify: restart rundeck
 
 - name: Import certificates to trust

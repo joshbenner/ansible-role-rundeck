@@ -21,12 +21,12 @@ rundeck_version: ""
 rundeck_install_java: true
 
 # URL to access Rundeck
-rundeck_external_url: http{{ 's' if rundeck_enable_ssl else '' }}://{{ ansible_fqdn }}:{{ rundeck_https_port if rundeck_enable_ssl else rundeck_http_port }}
+rundeck_external_url: http{{ 's' if rundeck_ssl_enable else '' }}://{{ ansible_fqdn }}:{{ rundeck_https_port if rundeck_ssl_enable else rundeck_http_port }}
 
 # Name (identity) of the Rundeck server node
 rundeck_server_name: "{{ ansible_fqdn }}"
 
-rundeck_install_cli: true
+rundeck_cli_enable: true
 rundeck_cli_user: "{{ ansible_facts.user_id }}"
 rundeck_cli_insecure_ssl: false
 rundeck_cli_auto_token: false
@@ -97,7 +97,7 @@ rundeck_open_file_limit: 65535
 rundeck_trust_certs: {}
 # ldap: /path/to/cert.pem
 
-rundeck_enable_ssl: false
+rundeck_ssl_enable: false
 rundeck_ssl_cert_path: "{{ rundeck_config_dir }}/ssl/cert.pem"
 rundeck_ssl_key_path: "{{ rundeck_config_dir }}/ssl/key.pem"
 
@@ -105,7 +105,7 @@ rundeck_ssl_key_path: "{{ rundeck_config_dir }}/ssl/key.pem"
 rundeck_ssl_cert: ''
 rundeck_ssl_key: ''
 
-rundeck_enable_ldap: false
+rundeck_ldap_enable: false
 rundeck_ldap_debug: false
 rundeck_ldap_url: ldap://server:389
 
