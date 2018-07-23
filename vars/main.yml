@@ -1,5 +1,7 @@
 ---
 _rundeck_conditionl_packages:
+  - name: openjdk-8-jre-headless
+    condition: "{{ rundeck_install_java }}"
   - name: rundeck-cli
     condition: "{{ rundeck_install_cli }}"
   - name: python-lxml

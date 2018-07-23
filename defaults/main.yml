@@ -17,6 +17,9 @@ rundeck_pin_version: "{{ rundeck_version|length > 0 }}"
 # by default is what will be installed. Set to a specific version as needed.
 rundeck_version: ""
 
+# Disable if you'd prefer to install Java differently.
+rundeck_install_java: true
+
 # URL to access Rundeck
 rundeck_external_url: http{{ 's' if rundeck_enable_ssl else '' }}://{{ ansible_fqdn }}:{{ rundeck_https_port if rundeck_enable_ssl else rundeck_http_port }}
 
