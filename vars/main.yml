@@ -21,6 +21,11 @@ rundeck_keystore: "{{ rundeck_ssl_dir }}/keystore"
 rundeck_truststore: "{{ rundeck_ssl_dir }}/truststore"
 rundeck_static_tokens_file: "{{ rundeck_config_dir }}/tokens.properties"
 
+_rundeck_cli_static_token:
+  user: cliuser
+  token: "{{ _cli_token }}"
+_rundeck_static_tokens: "{{ rundeck_static_tokens + ([_rundeck_cli_static_token] if rundeck_cli_auto_token else []) }}"
+
 _rundeck_config:
   rdeck:
     base: "{{ rundeck_base_dir }}"

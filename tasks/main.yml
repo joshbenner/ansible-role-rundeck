@@ -14,6 +14,10 @@
   loop: "{{ rundeck_plugins }}"
   notify: restart rundeck
 
+- name: Configure CLI
+  include_tasks: cli.yml
+  when: rundeck_install_cli
+
 - name: Configure Rundeck
   include_tasks: configure.yml
 

@@ -50,29 +50,6 @@
     mode: u=rw,g=r,o=r
   notify: restart rundeck
 
-- name: Create CLI user
-  user:
-    name: "{{ rundeck_cli_user }}"
-    state: present
-  register: _rundeck_cli_user
-
-- name: Create ~/.rd directory for CLI user
-  file:
-    path: "{{ _rundeck_cli_user.home }}/.rd/"
-    state: directory
-    owner: "{{ rundeck_cli_user }}"
-    group: "{{ rundeck_cli_user }}"
-    mode: u=rwx,g=,o=
-
-- name: Configure CLI
-  template:
-    src: cli.sh.j2
-    dest: "{{ _rundeck_cli_user.home }}/.rd/rd.conf"
-    owner: "{{ rundeck_cli_user }}"
-    group: "{{ rundeck_cli_user }}"
-    mode: u=rw,g=,o=
-  when: rundeck_install_cli
-
 - name: Configure LDAP
   template:
     src: jaas-ldap.conf.j2
@@ -87,11 +64,12 @@
     dest: "{{ rundeck_static_tokens_file }}"
     content: |
       # Ansible managed
-      {% for token in rundeck_static_tokens %}
+      {% for token in _rundeck_static_tokens %}
       {{ token.user }}: {{ token.token }}
       {% endfor %}
     owner: "{{ rundeck_user }}"
     group: "{{ rundeck_group }}"
+  notify: restart rundeck
 
 - name: Configure SSH
   include_tasks: ssh.yml
@@ -104,3 +82,7 @@
 - name: Configure trusted certs
   include_tasks: trust.yml
   when: rundeck_trust_certs|length or rundeck_enable_ssl
+
+- name: Configure access control
+  include_tasks: acl.yml
+  when: rundeck_acls|length

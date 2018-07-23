@@ -8,3 +8,6 @@ export RD_INSECURE_SSL=true
 {% else %}
 export RD_URL=http://127.0.0.1:{{ rundeck_http_port }}
 {% endif %}
+{% if rundeck_cli_auto_token %}
+export RD_TOKEN={{ _cli_token }}
+{% endif %}

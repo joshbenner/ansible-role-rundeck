@@ -9,11 +9,25 @@
       rundeck_session_timeout: 60
       rundeck_enable_ssl: true
       rundeck_cli_insecure_ssl: true
+      rundeck_cli_auto_token: true
       rundeck_ssl_cert_path: /etc/ssl/certs/ssl-cert-snakeoil.pem
       rundeck_ssl_key_path: /etc/ssl/private/ssl-cert-snakeoil.key
       rundeck_external_url: https://localhost:4430
       rundeck_trust_certs:
         snakeoil: /etc/ssl/certs/ssl-cert-snakeoil.pem
+      rundeck_acls:
+        - name: foo
+          state: absent
+        - name: my_policy
+          policy:
+            description: A policy
+            context:
+              application: rundeck
+            for:
+              project:
+                - allow: read
+            by:
+              group: somegroup
       rundeck_ssh_private_key: |
         -----BEGIN RSA PRIVATE KEY-----
         MIIEogIBAAKCAQEA+GmmJH7j4CTEsHGFVuU1xZOAsjvdgunGoJQRT4Yu16f3uk5a

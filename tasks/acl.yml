@@ -1,0 +1,18 @@
+---
+- name: Configure ACLs
+  copy:
+    dest: "{{ rundeck_config_dir }}/{{ item.name }}.aclpolicy"
+    content: "{{ item.policy | to_nice_yaml(indent=2) }}"
+  loop: "{{ rundeck_acls }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: item.state|d('present') == 'present'
+
+- name: Remove unwanted ACLs
+  file:
+    path: "{{ rundeck_config_dir }}/{{ item.name }}.aclpolicy"
+    state: absent
+  loop: "{{ rundeck_acls }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: item.state|d('present') == 'absent'

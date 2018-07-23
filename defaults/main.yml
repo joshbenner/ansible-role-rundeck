@@ -26,6 +26,37 @@ rundeck_server_name: "{{ ansible_fqdn }}"
 rundeck_install_cli: true
 rundeck_cli_user: "{{ ansible_facts.user_id }}"
 rundeck_cli_insecure_ssl: false
+rundeck_cli_auto_token: false
+rundeck_cli_auto_token_acl: |
+  description: Admin, all access.
+  context:
+    project: '.*' # all projects
+  for:
+    resource:
+      - allow: '*' # allow read/create all kinds
+    adhoc:
+      - allow: '*' # allow read/running/killing adhoc jobs
+    job:
+      - allow: '*' # allow read/write/delete/run/kill of all jobs
+    node:
+      - allow: '*' # allow read/run for all nodes
+  by:
+    username: cliuser
+  ---
+  description: Admin, all access.
+  context:
+    application: 'rundeck'
+  for:
+    resource:
+      - allow: '*' # allow create of projects
+    project:
+      - allow: '*' # allow view/admin of all projects
+    project_acl:
+      - allow: '*' # allow admin of all project-level ACL policies
+    storage:
+      - allow: '*' # allow read/create/update/delete for all /keys/* storage content
+  by:
+    group: cliuser
 
 # Set execution mode to 'active' or 'passive' (no jobs can be run)
 rundeck_execution_mode: active
@@ -108,3 +139,17 @@ rundeck_static_tokens: []
 rundeck_plugins: []
 # - url: https://example.com/some-plugin.jar
 #   checksum: sha256:...
+
+rundeck_acls: []
+# - name: my_policy
+#   policy:
+#     description: A policy
+#     context:
+#       application: rundeck
+#     for:
+#       project:
+#         - allow: read
+#     by:
+#       group: somegroup
+# - name: old_policy
+#   state: absent
