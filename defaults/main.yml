@@ -104,3 +104,7 @@ rundeck_ssh_private_key: ''
 rundeck_static_tokens: []
 # - user: someuser
 #   token: sekrit
+
+rundeck_plugins: []
+# - url: https://example.com/some-plugin.jar
+#   checksum: sha256:...

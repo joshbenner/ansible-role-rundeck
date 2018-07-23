@@ -3,6 +3,16 @@
   include_tasks: install_debian.yml
   when: ansible_os_family == 'Debian'
 
+- name: Download plugins
+  get_url:
+    dest: "{{ rundeck_base_dir }}/libext/{{ item.url | basename }}"
+    url: "{{ item.url }}"
+    checksum: "{{ item.checksum | d(omit) }}"
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_group }}"
+    mode: u=rw,g=r,o=r
+  notify: restart rundeck
+
 - name: Configure Rundeck
   include_tasks: configure.yml
 
