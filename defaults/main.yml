@@ -156,3 +156,12 @@ rundeck_acls: []
 #       group: somegroup
 # - name: old_policy
 #   state: absent
+
+# If cleanup is enabled, you probably also need the CLI enabled, unless you
+# arrange for the rd commandline tool to be installed some other way.
+rundeck_cleanup_enable: false
+rundeck_cleanup_batch_size: 20
+rundeck_cleanup_older_than: 30d
+rundeck_cleanup_schedule:
+  special_time: daily
+rundeck_cleanup_script_path: /usr/local/bin/rd-cleanup

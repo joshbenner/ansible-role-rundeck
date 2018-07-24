@@ -1,7 +1,7 @@
 # {{ ansible_managed }}
 
 {% if rundeck_ssl_enable %}
-export RD_URL=https://127.0.0.1:{{ rundeck_https_port }}
+export RD_URL={{ rundeck_external_url }}
 {% if rundeck_cli_insecure_ssl %}
 export RD_INSECURE_SSL=true
 {% endif %}

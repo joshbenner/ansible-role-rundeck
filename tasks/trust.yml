@@ -1,24 +1,28 @@
 ---
-- name: Trust SSL cert
-  java_cert:
-    pkcs12_path: "{{ rundeck_ssl_dir }}/cert.p12"
-    pkcs12_password: adminadmin
-    pkcs12_alias: rundeck
-    cert_alias: rundeck
-    keystore_path: "{{ rundeck_truststore }}"
-    keystore_pass: adminadmin
-    keystore_create: yes
-    state: present
+- name: Trust main Rundeck cert
+  tags:
+    - rundeck-trust
+  include_tasks: import_cert.yml
+  vars:
+    _store: "{{ rundeck_truststore }}"
+    cert:
+      key: rundeck
+      value: "{{ rundeck_ssl_cert_path }}"
   when: rundeck_ssl_enable
-  notify: restart rundeck
 
 - name: Import certificates to trust
+  tags:
+    - rundeck-trust
   include_tasks: import_cert.yml
+  vars:
+    _store: "{{ rundeck_truststore }}"
   loop: "{{ rundeck_trust_certs | dict2items }}"
   loop_control:
     loop_var: cert
 
 - name: Set trust permissions
+  tags:
+    - rundeck-trust
   file:
     path: "{{ rundeck_truststore }}"
     state: file
@@ -27,6 +31,8 @@
     mode: u=rw,g=r,o=
 
 - name: Get list of certs in truststore
+  tags:
+    - rundeck-trust
   shell: >-
     keytool -list -v -keystore {{ rundeck_truststore }} -storepass adminadmin
     | grep 'Alias name'
@@ -35,7 +41,10 @@
   changed_when: false
 
 - name: Remove unwanted certs from truststore
+  tags:
+    - rundeck-trust
   java_cert:
+    cert_url: 'dummy value - see https://github.com/ansible/ansible/issues/27982'
     cert_alias: "{{ item }}"
     state: absent
     keystore_path: "{{ rundeck_truststore }}"

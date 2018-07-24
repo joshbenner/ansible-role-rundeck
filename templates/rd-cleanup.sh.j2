@@ -1,0 +1,25 @@
+#!/bin/bash -e
+
+RD_CLEANUP_BATCH=${RD_CLEANUP_BATCH:-{{ rundeck_cleanup_batch_size }}}
+RD_CLEANUP_OLDER_THAN=${RD_CLEANUP_OLDER_THAN:-{{ rundeck_cleanup_older_than }}}
+
+export RD_HTTP_TIMEOUT=300
+
+if [ ! `which rd` ]; then
+  echo "rd command line tool is required!"
+  exit 1
+fi
+
+projects=$(RD_FORMAT=yaml rd projects list | sed '/^\s*$/d' | awk '{print $2}')
+
+for project in projects; do
+  printf "Cleaning project $project: "
+  while true; do
+    printf '.'
+    rd executions deletebulk -y -R -p $project -m $RD_CLEANUP_BATCH -O $RD_CLEANUP_OLDER_THAN || break
+  done
+  printf "\n"
+done
+
+echo "Done Rundeck cleanup!"
+exit 0

@@ -1,9 +1,13 @@
 ---
 - name: Install for Debian family
+  tags:
+    - rundeck-install
   include_tasks: install_debian.yml
   when: ansible_os_family == 'Debian'
 
 - name: Download plugins
+  tags:
+    - rundeck-plugins
   get_url:
     dest: "{{ rundeck_base_dir }}/libext/{{ item.url | basename }}"
     url: "{{ item.url }}"
@@ -15,11 +19,13 @@
   notify: restart rundeck
 
 - name: Configure CLI
+  tags:
+    - rundeck-cli
   include_tasks: cli.yml
   when: rundeck_cli_enable
 
 - name: Configure Rundeck
-  include_tasks: configure.yml
+  import_tasks: configure.yml
 
 # Flush first so that if a restart is pending, we don't start and immediately
 # restart upon initial install.
@@ -27,6 +33,8 @@
   meta: flush_handlers
 
 - name: Enable Rundeck service
+  tags:
+    - rundeck-configure
   service:
     name: rundeckd
     state: started

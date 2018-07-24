@@ -72,17 +72,32 @@
   notify: restart rundeck
 
 - name: Configure SSH
+  tags:
+    - rundeck-ssh
   include_tasks: ssh.yml
   when: rundeck_ssh_private_key|length
 
 - name: Configure SSL
+  tags:
+    - rundeck-ssl
   include_tasks: ssl.yml
   when: rundeck_ssl_enable
 
 - name: Configure trusted certs
+  tags:
+    - rundeck-trust
   include_tasks: trust.yml
   when: rundeck_trust_certs|length or rundeck_ssl_enable
 
 - name: Configure access control
+  tags:
+    - rundeck-acl
   include_tasks: acl.yml
   when: rundeck_acls|length
+
+- name: Configure cleanup job
+  tags:
+    - rundeck-cleanup
+  include_tasks: cleanup.yml
+  when:
+    - rundeck_cleanup_enable

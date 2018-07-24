@@ -7,5 +7,21 @@
         name: "{{ item }}"
         state: present
       with_items:
-        - openjdk-8-jre-headless
-        - ssl-cert
+        - python-openssl
+
+    - name: Generate localhost private key
+      openssl_privatekey:
+        path: /etc/ssl/localhost.key
+
+    - name: Generate localhost CSR
+      openssl_csr:
+        path: /etc/ssl/localhost.csr
+        privatekey_path: /etc/ssl/localhost.key
+        common_name: localhost
+
+    - name: Generate localhost cert
+      openssl_certificate:
+        path: /etc/ssl/localhost.crt
+        privatekey_path: /etc/ssl/localhost.key
+        csr_path: /etc/ssl/localhost.csr
+        provider: selfsigned

@@ -1,10 +1,14 @@
 ---
 - name: Set cert vars
+  tags:
+    - rundeck-trust
   set_fact:
     _cert_name: "{{ cert.key }}"
     _cert_path: "{{ cert.value }}"
 
-- name: Check cert to import
+- name: Check {{ _cert_path }}
+  tags:
+    - rundeck-trust
   stat:
     path: "{{ _cert_path }}"
     get_attributes: false
@@ -13,29 +17,97 @@
   register: _cert_stat
 
 - name: Set cert vars
+  tags:
+    - rundeck-trust
   set_fact:
     _der_path: "{{ rundeck_ssl_dir }}/{{ _cert_name }}-{{ _cert_stat.stat.checksum }}.der"
     _is_der: "{{ (cert.value|lower).endswith('.der') }}"
 
 - name: Convert PEM certs to DER
+  tags:
+    - rundeck-trust
   command: openssl x509 -outform der -in {{ _cert_path }} -out {{ _der_path }}
   args:
     creates: "{{ _der_path }}"
   when: not _is_der
 
-- name: Copy DER cert into position
+- name: Copy DER cert to {{ _der_path }}
+  tags:
+    - rundeck-trust
   copy:
     remote_src: true
     src: "{{ _cert_path }}"
     dest: "{{ _der_path }}"
   when: _is_der
 
-- name: Trust cert '{{ _cert_name }}'
+- name: Check if {{ _store }} exists
+  tags:
+    - rundeck-trust
+  stat:
+    path: "{{ _store }}"
+  register: _store_check
+
+- name: Check if '{{ _cert_name }}' in truststore
+  tags:
+    - rundeck-trust
+  shell: >-
+    keytool -list -alias {{ _cert_name }} -keystore {{ _store }} -storepass adminadmin
+  register: _cert_in_store
+  failed_when: false
+  changed_when: _cert_in_store.rc != 0
+
+- name: Compare existing stored cert to DER cert
+  tags:
+    - rundeck-trust
+  when:
+    - _store_check.stat.exists
+    - not _cert_in_store is changed
+  block:
+    - name: Get DER fingerprint
+      shell: >-
+        openssl x509 -in {{ _der_path }} -noout -sha256 -fingerprint -inform der
+        | awk -F '=' '{print $2}'
+      register: _der_fingerprint
+      changed_when: false
+
+    - name: Get stored cert fingerprint
+      shell: >-
+        keytool -list -alias {{ _cert_name }} -v -keystore {{ _store }} -storepass adminadmin
+        | grep 'SHA256:' | awk -F 'SHA256: ' '{print $2}'
+      register: _store_fingerprint
+      changed_when: false
+
+    - name: Compare fingerprints
+      set_fact:
+        _fp_diff: "{{ _der_fingerprint.stdout_lines[0] != _store_fingerprint.stdout_lines[0] }}"
+
+- name: Trust store does not exist
+  tags:
+    - rundeck-trust
+  set_fact:
+    _fp_diff: true
+  when: (not _store_check.stat.exists) or _cert_in_store is changed
+
+- name: Remove old '{{ _cert_name }}' from {{ _store }}
+  tags:
+    - rundeck-trust
+  java_cert:
+    cert_url: 'dummy value - see https://github.com/ansible/ansible/issues/27982'
+    cert_alias: "{{ _cert_name }}"
+    state: absent
+    keystore_path: "{{ _store }}"
+    keystore_pass: adminadmin
+  when: _fp_diff
+
+- name: Import cert '{{ _cert_name }}' to {{ _store }}
+  tags:
+    - rundeck-trust
   java_cert:
     cert_path: "{{ _der_path }}"
     cert_alias: "{{ _cert_name }}"
-    keystore_path: "{{ rundeck_truststore }}"
+    keystore_path: "{{ _store }}"
     keystore_pass: adminadmin
     keystore_create: yes
     state: present
+  when: _fp_diff
   notify: restart rundeck

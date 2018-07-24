@@ -1,0 +1,6 @@
+---
+- name: Write Rundeck cleanup script
+  template:
+    src: rd-cleanup.sh.j2
+    dest: "{{ rundeck_cleanup_script_path }}"
+    mode: u=rwx,g=rx,o=rx
