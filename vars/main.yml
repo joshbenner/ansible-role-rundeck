@@ -28,6 +28,13 @@ _rundeck_cli_static_token:
   token: "{{ _cli_token }}"
 _rundeck_static_tokens: "{{ rundeck_static_tokens + ([_rundeck_cli_static_token] if rundeck_cli_auto_token else []) }}"
 
+_rundeck_standard_jvm_settings:
+  - -Xmx{{ rundeck_maximum_heap_size }}
+  - -Xms{{ rundeck_initial_heap_size }}
+  - -XX:MaxMetaspaceSize={{ rundeck_maximum_metaspace_size }}
+  - -server
+_rundeck_jvm_settings: "{{ rundeck_extra_jvm_settings + _rundeck_standard_jvm_settings }}"
+
 _rundeck_config:
   rdeck:
     base: "{{ rundeck_base_dir }}"

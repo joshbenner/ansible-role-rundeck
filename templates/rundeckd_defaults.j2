@@ -3,7 +3,7 @@
 RDECK_INSTALL="{{ rundeck_base_dir }}"
 RDECK_BASE="{{ rundeck_base_dir }}"
 RDECK_CONFIG="{{ rundeck_config_dir }}"
-RDECK_JVM_SETTINGS="-Xmx{{ rundeck_maximum_heap_size }} -Xms{{ rundeck_initial_heap_size }} -XX:MaxMetaspaceSize={{ rundeck_maximum_metaspace_size }} -server"
+RDECK_JVM_SETTINGS="{{ _rundeck_jvm_settings|join(' ') }}"
 RDECK_HTTP_PORT="{{ rundeck_http_port }}"
 RDECK_HTTPS_PORT="{{ rundeck_https_port }}"
 {% if rundeck_ssl_enable -%}

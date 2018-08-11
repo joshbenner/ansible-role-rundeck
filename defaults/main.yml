@@ -90,6 +90,7 @@ rundeck_https_port: 4430
 rundeck_initial_heap_size: 256m
 rundeck_maximum_heap_size: 1024m
 rundeck_maximum_metaspace_size: 256m
+rundeck_extra_jvm_settings: []
 
 rundeck_open_file_limit: 65535
 
