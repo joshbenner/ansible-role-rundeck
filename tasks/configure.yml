@@ -54,9 +54,9 @@
   template:
     src: jaas-ldap.conf.j2
     dest: "{{ rundeck_config_dir }}/jaas-ldap.conf"
-    owner: "{{ rundeck_cli_user }}"
-    group: "{{ rundeck_cli_user }}"
-    mode: u=rwx,g=,o=
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_group }}"
+    mode: u=rw,g=,o=
   when: rundeck_ldap_enable
 
 - name: Write static tokens
