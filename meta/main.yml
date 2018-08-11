@@ -1,5 +1,6 @@
 ---
 galaxy_info:
+  role_name: rundeck
   author: Josh Benner
   description: Install and configure Rundeck
   license: BSD
