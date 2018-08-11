@@ -66,7 +66,8 @@ _rundeck_framework:
     globals: "{{ rundeck_globals }}"
     server:
       name: "{{ rundeck_server_name }}"
-      hostname: localhost
+      hostname: "{{ ansible_fqdn }}"
+      host: "{{ rundeck_listen_address }}"
       port: "{{ rundeck_https_port if rundeck_ssl_enable else rundeck_http_port }}"
       url: "{{ rundeck_external_url }}"
     ssh:

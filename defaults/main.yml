@@ -83,6 +83,7 @@ rundeck_globals: {}
 rundeck_set_session_timeout: true
 rundeck_session_timeout: 30
 
+rundeck_listen_address: 0.0.0.0
 rundeck_http_port: 4440
 rundeck_https_port: 4430
 
