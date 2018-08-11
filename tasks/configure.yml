@@ -57,6 +57,7 @@
     owner: "{{ rundeck_user }}"
     group: "{{ rundeck_group }}"
     mode: u=rw,g=,o=
+  notify: restart rundeck
   when: rundeck_ldap_enable
 
 - name: Write static tokens
