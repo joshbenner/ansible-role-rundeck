@@ -29,6 +29,7 @@ _rundeck_cli_static_token:
 _rundeck_static_tokens: "{{ rundeck_static_tokens + ([_rundeck_cli_static_token] if rundeck_cli_auto_token else []) }}"
 
 _rundeck_standard_jvm_settings:
+  - -Dserver.http.host={{ rundeck_listen_address }}
   - -Xmx{{ rundeck_maximum_heap_size }}
   - -Xms{{ rundeck_initial_heap_size }}
   - -XX:MaxMetaspaceSize={{ rundeck_maximum_metaspace_size }}
@@ -67,7 +68,6 @@ _rundeck_framework:
     server:
       name: "{{ rundeck_server_name }}"
       hostname: "{{ ansible_fqdn }}"
-      host: "{{ rundeck_listen_address }}"
       port: "{{ rundeck_https_port if rundeck_ssl_enable else rundeck_http_port }}"
       url: "{{ rundeck_external_url }}"
     ssh:
