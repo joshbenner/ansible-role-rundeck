@@ -97,7 +97,7 @@
     state: absent
     keystore_path: "{{ _store }}"
     keystore_pass: adminadmin
-  when: _fp_diff
+  when: _fp_diff and _store_check.stat.exists
 
 - name: Import cert '{{ _cert_name }}' to {{ _store }}
   tags:

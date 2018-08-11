@@ -4,6 +4,23 @@ Install and configure Rundeck.
 
 Right now this role only targets Ubuntu 16.04.
 
+## Role Features
+
+* Installs OpenJDK (optional).
+* Pins the Rundeck apt package version if set (optional).
+* Allows for injection of arbitrary Rundeck configuration.
+* Controls execution mode (default: active).
+* Configures Rundeck CLI (optional).
+* Sets Rundeck global variables.
+* Configures Java VM parameters.
+* Configures SSL keystore (just provide the cert/key).
+* Configures TLS truststore (just provide certs to trust).
+* Configures LDAP integration (optional).
+* Deploys a custom SSH key (optional).
+* Installs Rundeck plugins (optional).
+* Configures Rundeck on-disk ACLs.
+* Can configure a cleanup script to remote old job logs (optional; default off).
+
 ## Notes
 
 * OpenJDK JRE 8 headless is installed, but this can be disabled by setting `rundeck_install_java` to `false`.

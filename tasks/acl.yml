@@ -2,7 +2,10 @@
 - name: Configure ACLs
   copy:
     dest: "{{ rundeck_config_dir }}/{{ item.name }}.aclpolicy"
-    content: "{{ item.policy | to_nice_yaml(indent=2) }}"
+    content: "{{ (item.policy | to_nice_yaml(indent=2)) if item.policy is mapping else item.policy }}"
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_group }}"
+    mode: u=rw,g=r,o=
   loop: "{{ rundeck_acls }}"
   loop_control:
     label: "{{ item.name }}"

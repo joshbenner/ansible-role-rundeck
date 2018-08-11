@@ -105,13 +105,13 @@
     keystore_path: "{{ rundeck_keystore }}"
     keystore_pass: adminadmin
     state: absent
-  when: _fp_diff
+  when: _fp_diff and _keystore_check.stat.exists
 
 - name: Put cert in Rundeck keystore
   tags:
     - rundeck-ssl
   java_cert:
-    pkcs12_path: "{{ rundeck_ssl_dir }}/cert.p12"
+    pkcs12_path: "{{ _p12_path }}"
     pkcs12_password: adminadmin
     pkcs12_alias: rundeck
     cert_alias: rundeck

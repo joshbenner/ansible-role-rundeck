@@ -59,7 +59,7 @@ rundeck_cli_auto_token_acl: |
     storage:
       - allow: '*' # allow read/create/update/delete for all /keys/* storage content
   by:
-    group: cliuser
+    username: cliuser
 
 # Set execution mode to 'active' or 'passive' (no jobs can be run)
 rundeck_execution_mode: active
@@ -165,3 +165,4 @@ rundeck_cleanup_older_than: 30d
 rundeck_cleanup_schedule:
   special_time: daily
 rundeck_cleanup_script_path: /usr/local/bin/rd-cleanup
+rundeck_cleanup_cron_file: ansible_rundeck-cleanup

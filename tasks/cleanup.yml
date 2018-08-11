@@ -4,3 +4,16 @@
     src: rd-cleanup.sh.j2
     dest: "{{ rundeck_cleanup_script_path }}"
     mode: u=rwx,g=rx,o=rx
+
+- name: Schedule Rundeck cleanup job
+  cron:
+    name: Rundeck cleanup
+    cron_file: "{{ rundeck_cleanup_cron_file | d(omit) }}"
+    minute: "{{ rundeck_cleanup_schedule.minute | d(omit) }}"
+    hour: "{{ rundeck_cleanup_schedule.hour | d(omit) }}"
+    weekday: "{{ rundeck_cleanup_schedule.weekday | d(omit) }}"
+    day: "{{ rundeck_cleanup_schedule.day | d(omit) }}"
+    month: "{{ rundeck_cleanup_schedule.month | d(omit) }}"
+    special_time: "{{ rundeck_cleanup_schedule.special_time | d(omit) }}"
+    user: "{{ rundeck_user }}"
+    job: "{{ rundeck_cleanup_script_path }}"

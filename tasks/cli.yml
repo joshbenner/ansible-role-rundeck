@@ -54,8 +54,8 @@
     dest: "{{ rundeck_config_dir }}/cliuser.aclpolicy"
     content: "{{ rundeck_cli_auto_token_acl }}"
     owner: "{{ rundeck_cli_user }}"
-    group: "{{ rundeck_cli_user }}"
-    mode: u=rw,g=,o=
+    group: "{{ rundeck_group }}"
+    mode: u=r,g=r,o=
   when:
     - rundeck_cli_auto_token
     - rundeck_cli_auto_token_acl|length

@@ -22,9 +22,34 @@ def test_trusted_cert(host):
     out = host.check_output('keytool -list '
                             '-keystore /etc/rundeck/ssl/truststore '
                             '-storepass adminadmin')
-    assert 'snakeoil' in out
+    assert 'localhost' in out
     assert 'rundeck' in out
 
 
 def test_ssh_key(host):
     assert host.file('/var/lib/rundeck/.ssh/id_rsa').exists
+
+
+def test_static_token_exists(host):
+    token_file = host.file('/etc/rundeck/tokens.properties')
+    assert token_file.exists
+    assert 'test-api: sekrit' in token_file.content
+
+
+def test_structured_acl(host):
+    my_policy = host.file('/etc/rundeck/my_policy.aclpolicy')
+    assert my_policy.exists
+    assert 'group: somegroup' in my_policy.content
+
+
+def test_acl_perms(host):
+    acl = host.file('/etc/rundeck/my_policy.aclpolicy')
+    assert acl.user == 'rundeck'
+    assert acl.group == 'rundeck'
+    assert acl.mode == 0o640
+
+
+def test_raw_acl(host):
+    raw_acl = host.file('/etc/rundeck/test-api.aclpolicy')
+    assert raw_acl.exists
+    assert 'username: test-api' in raw_acl.content

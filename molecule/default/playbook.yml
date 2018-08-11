@@ -1,58 +1,103 @@
 ---
 - name: Converge
   hosts: all
+  post_tasks:
+    - name: Wait for Rundeck to be up
+      wait_for:
+        port: 4430
+        delay: 5
+    - name: Create Rundeck project
+      rundeck_project:
+        name: ansible-test
+        url: https://localhost:4430
+        token: sekrit
   roles:
     - role: ../../..
-      rundeck_version: 2.11.5
-      rundeck_cleanup_enable: true
-      rundeck_globals:
-        foo: bar
-      rundeck_session_timeout: 60
-      rundeck_ssl_enable: true
-      rundeck_cli_auto_token: true
-      rundeck_ssl_cert_path: /etc/ssl/localhost.crt
-      rundeck_ssl_key_path: /etc/ssl/localhost.key
-      rundeck_external_url: https://localhost:4430
-      rundeck_trust_certs:
-        localhost: /etc/ssl/localhost.crt
-      rundeck_acls:
-        - name: foo
-          state: absent
-        - name: my_policy
-          policy:
-            description: A policy
-            context:
-              application: rundeck
-            for:
-              project:
-                - allow: read
-            by:
-              group: somegroup
-      rundeck_ssh_private_key: |
-        -----BEGIN RSA PRIVATE KEY-----
-        MIIEogIBAAKCAQEA+GmmJH7j4CTEsHGFVuU1xZOAsjvdgunGoJQRT4Yu16f3uk5a
-        3Ru31NwioD6SfQkYimcTWBme/oVX5jkYUK6/8J/oCIHEOOnWR0ALUc90QSJ98BrF
-        QVWDLrk3NEwEkwsuu7bBpvvQdacsWL/318cLGrZ/6YexViVCU+KAH6FEKhHnIBjs
-        lBIbjFeEvs0pT+GjXclxnDT7bXbgQQl3MxRZdlbWLgDGG8WbtLEI5YxMXCNcyPPW
-        qlKjJ6laEGObbRPmCn8yQ5M1xhpVUotLUYHzfcyT0ng6IYqAI6iX5FU2vh/nrqbq
-        1/bNTd2u1dUjM5zpmSjt6Tq/pJYr6g9gxid/dQIDAQABAoIBACBljuBlmAxsXyZv
-        t6cMf4XD5d3YxtvC5z+b7+ICKuu/ISSwAVOiwMfG6dEiN/KMlCHArZooxT6GX19M
-        BOrIz4lvIVCys8eEX4itRoyl1JCGEgyVQTJzF4epahSs8U/H/pFGlVzUrGwboEH2
-        zzjZ4Y3bTTVEmBEXDN5pxLHbU0t1BnsMLa4MFBMHfDjNKYN5rrTXganHmoIr2ZRP
-        Gzdm4RQXlU1wlQzkNTu6u8GR39u5y0oJNYRKTHJcXlobriU6iokCgBkpnf2pIWG/
-        RlJSW0xDm37vsDmw2KXYkw6tUh97laNC2b9De2r9YdQkeVzxSMfERzgCnRoFROGv
-        myXSTsUCgYEA/m4qEL2ZcvjXK/S666TOUdwDHVpogrEixRh2TJaXP9tdeOMbxI2T
-        csWR0P8KA3RsXr1Qgcd8ZQdP/LQPQEhkPHsPwrsL8GJfG8bhV+DXq3cmlgKTrOjt
-        r2h2G5E+ysbA1FH6nYj2OjcPFloW4MDSg5rCthqEIgZtplPTK7LOzp8CgYEA+fH7
-        DrCHgtVZXykY+H1sNefI8yTbaLfTMzSI/zm75SFZWU7pXUjKEqbRmR2aDcqzoyVp
-        avIeMgGIso9WPEP3Kje8FGY96fe4f3UPdNCkH2R2A/dGML90Vwucm8vuxXBbPPhR
-        smSuPvg7YwiCOHY+4+FvFZBMX1vGAzT/DN38/WsCgYACNII40uvZiz6SKvTTxgHj
-        w7xjLL1rJI3gl22vDD8TVptgyNccxP1aKUwyO4OitAecapegCFKTrZSL5COdswLr
-        Y0WnsmdQFgos+3RIhrJX0hiLhEozXXFx673aT0/0AfT54hwB8YXwyzleQDmiiQlK
-        CrVVTrWGdffNUTyrTElukQKBgDmWo33S9qYSejEOyw4V9+TDru02xMbv892McTQ9
-        HSnB8VA+ek5gAw8hGJHq3B/pYFJqwEs/1e03pUNe+0OPdVdo2BDrLcDGrt/PHOyR
-        Vf9VqktnoeiBdFDKAB91cWJUbPEzVb+AqxUfJK/AuiBAPmVK/8k8IhymjI0YnNte
-        GnhZAoGAZPt+6L5mSqlRRhnysPbmnHhbtRBjyfzhu3NpNx/8WF8CrFte2QwMjmOY
-        nXOTu1S4AenEEnYtiu7WzErh3D/2Me1EOQ9JFBXaKPyL7zXX97tUMK6YEegUgISj
-        e12ejA90dD/5+EAITB00C46R21lWkCM+XPjuyQmIa7ydKqNlUsM=
-        -----END RSA PRIVATE KEY-----
+  vars:
+    rundeck_version: 2.11.5
+    rundeck_cleanup_enable: true
+    rundeck_globals:
+      foo: bar
+    rundeck_session_timeout: 60
+    rundeck_ssl_enable: true
+    rundeck_cli_auto_token: true
+    rundeck_ssl_cert_path: /etc/ssl/localhost.crt
+    rundeck_ssl_key_path: /etc/ssl/localhost.key
+    rundeck_external_url: https://localhost:4430
+    rundeck_trust_certs:
+      localhost: /etc/ssl/localhost.crt
+    rundeck_static_tokens:
+      - user: test-api
+        token: sekrit
+    rundeck_acls:
+      - name: foo
+        state: absent
+      - name: my_policy
+        policy:
+          description: A policy
+          context:
+            application: rundeck
+          for:
+            project:
+              - allow: read
+          by:
+            group: somegroup
+      - name: test-api
+        policy: |
+          description: Admin, all access.
+          context:
+            project: '.*' # all projects
+          for:
+            resource:
+              - allow: '*' # allow read/create all kinds
+            adhoc:
+              - allow: '*' # allow read/running/killing adhoc jobs
+            job:
+              - allow: '*' # allow read/write/delete/run/kill of all jobs
+            node:
+              - allow: '*' # allow read/run for all nodes
+          by:
+            username: test-api
+          ---
+          description: Admin, all access.
+          context:
+            application: 'rundeck'
+          for:
+            resource:
+              - allow: '*' # allow create of projects
+            project:
+              - allow: '*' # allow view/admin of all projects
+            project_acl:
+              - allow: '*' # allow admin of all project-level ACL policies
+            storage:
+              - allow: '*' # allow read/create/update/delete for all /keys/* storage content
+          by:
+            username: test-api
+    rundeck_ssh_private_key: |
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEogIBAAKCAQEA+GmmJH7j4CTEsHGFVuU1xZOAsjvdgunGoJQRT4Yu16f3uk5a
+      3Ru31NwioD6SfQkYimcTWBme/oVX5jkYUK6/8J/oCIHEOOnWR0ALUc90QSJ98BrF
+      QVWDLrk3NEwEkwsuu7bBpvvQdacsWL/318cLGrZ/6YexViVCU+KAH6FEKhHnIBjs
+      lBIbjFeEvs0pT+GjXclxnDT7bXbgQQl3MxRZdlbWLgDGG8WbtLEI5YxMXCNcyPPW
+      qlKjJ6laEGObbRPmCn8yQ5M1xhpVUotLUYHzfcyT0ng6IYqAI6iX5FU2vh/nrqbq
+      1/bNTd2u1dUjM5zpmSjt6Tq/pJYr6g9gxid/dQIDAQABAoIBACBljuBlmAxsXyZv
+      t6cMf4XD5d3YxtvC5z+b7+ICKuu/ISSwAVOiwMfG6dEiN/KMlCHArZooxT6GX19M
+      BOrIz4lvIVCys8eEX4itRoyl1JCGEgyVQTJzF4epahSs8U/H/pFGlVzUrGwboEH2
+      zzjZ4Y3bTTVEmBEXDN5pxLHbU0t1BnsMLa4MFBMHfDjNKYN5rrTXganHmoIr2ZRP
+      Gzdm4RQXlU1wlQzkNTu6u8GR39u5y0oJNYRKTHJcXlobriU6iokCgBkpnf2pIWG/
+      RlJSW0xDm37vsDmw2KXYkw6tUh97laNC2b9De2r9YdQkeVzxSMfERzgCnRoFROGv
+      myXSTsUCgYEA/m4qEL2ZcvjXK/S666TOUdwDHVpogrEixRh2TJaXP9tdeOMbxI2T
+      csWR0P8KA3RsXr1Qgcd8ZQdP/LQPQEhkPHsPwrsL8GJfG8bhV+DXq3cmlgKTrOjt
+      r2h2G5E+ysbA1FH6nYj2OjcPFloW4MDSg5rCthqEIgZtplPTK7LOzp8CgYEA+fH7
+      DrCHgtVZXykY+H1sNefI8yTbaLfTMzSI/zm75SFZWU7pXUjKEqbRmR2aDcqzoyVp
+      avIeMgGIso9WPEP3Kje8FGY96fe4f3UPdNCkH2R2A/dGML90Vwucm8vuxXBbPPhR
+      smSuPvg7YwiCOHY+4+FvFZBMX1vGAzT/DN38/WsCgYACNII40uvZiz6SKvTTxgHj
+      w7xjLL1rJI3gl22vDD8TVptgyNccxP1aKUwyO4OitAecapegCFKTrZSL5COdswLr
+      Y0WnsmdQFgos+3RIhrJX0hiLhEozXXFx673aT0/0AfT54hwB8YXwyzleQDmiiQlK
+      CrVVTrWGdffNUTyrTElukQKBgDmWo33S9qYSejEOyw4V9+TDru02xMbv892McTQ9
+      HSnB8VA+ek5gAw8hGJHq3B/pYFJqwEs/1e03pUNe+0OPdVdo2BDrLcDGrt/PHOyR
+      Vf9VqktnoeiBdFDKAB91cWJUbPEzVb+AqxUfJK/AuiBAPmVK/8k8IhymjI0YnNte
+      GnhZAoGAZPt+6L5mSqlRRhnysPbmnHhbtRBjyfzhu3NpNx/8WF8CrFte2QwMjmOY
+      nXOTu1S4AenEEnYtiu7WzErh3D/2Me1EOQ9JFBXaKPyL7zXX97tUMK6YEegUgISj
+      e12ejA90dD/5+EAITB00C46R21lWkCM+XPjuyQmIa7ydKqNlUsM=
+      -----END RSA PRIVATE KEY-----

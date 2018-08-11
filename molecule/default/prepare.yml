@@ -4,10 +4,10 @@
   tasks:
     - name: Install prerequisites
       apt:
-        name: "{{ item }}"
+        name:
+          - python-openssl
+          - ca-certificates
         state: present
-      with_items:
-        - python-openssl
 
     - name: Generate localhost private key
       openssl_privatekey:
@@ -25,3 +25,14 @@
         privatekey_path: /etc/ssl/localhost.key
         csr_path: /etc/ssl/localhost.csr
         provider: selfsigned
+
+    - name: Copy localhost cert to trust store
+      copy:
+        remote_src: true
+        src: /etc/ssl/localhost.crt
+        dest: /usr/local/share/ca-certificates/localhost.crt
+      register: _cert_copy
+
+    - name: Update trusted CA certs
+      command: update-ca-certificates
+      when: _cert_copy is changed
