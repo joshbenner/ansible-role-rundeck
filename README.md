@@ -19,7 +19,7 @@ Right now this role only targets Ubuntu 16.04.
 * Deploys a custom SSH key (optional).
 * Installs Rundeck plugins (optional).
 * Configures Rundeck on-disk ACLs.
-* Can configure a cleanup script to remote old job logs (optional; default off).
+* Can configure a cleanup script to remove old job logs (optional; default off).
 
 ## Notes
 
