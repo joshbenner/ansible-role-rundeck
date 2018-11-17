@@ -168,3 +168,4 @@ rundeck_cleanup_schedule:
   special_time: daily
 rundeck_cleanup_script_path: /usr/local/bin/rd-cleanup
 rundeck_cleanup_cron_file: ansible_rundeck-cleanup
+rundeck_cleanup_user: "{{ rundeck_cli_user }}"
