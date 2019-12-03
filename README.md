@@ -11,11 +11,14 @@ Right now this role only targets Ubuntu 16.04.
 * Allows for injection of arbitrary Rundeck configuration.
 * Controls execution mode (default: active).
 * Configures Rundeck CLI (optional).
+* Configures database (default to Hsqldb, may use MySQL or PostgreSQL)
 * Sets Rundeck global variables.
 * Configures Java VM parameters.
 * Configures SSL keystore (just provide the cert/key).
 * Configures TLS truststore (just provide certs to trust).
 * Configures LDAP integration (optional).
+* Configures CROWD integration (optional).
+* Configures on-disk users (optional).
 * Deploys a custom SSH key (optional).
 * Installs Rundeck plugins (optional).
 * Configures Rundeck on-disk ACLs.

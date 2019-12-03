@@ -1,0 +1,13 @@
+---
+- name: Download plugins
+  tags:
+    - rundeck-plugins
+  get_url:
+    dest: "{{ rundeck_base_dir }}/libext/{{ item.url | basename }}"
+    url: "{{ item.url }}"
+    checksum: "{{ item.checksum | d(omit) }}"
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_group }}"
+    mode: u=rw,g=r,o=r
+  loop: "{{ rundeck_plugins }}"
+  notify: restart rundeck

@@ -60,6 +60,29 @@
   notify: restart rundeck
   when: rundeck_ldap_enable
 
+- name: Configure CROWD
+  template:
+    src: jaas-crowd.conf.j2
+    dest: "{{ rundeck_config_dir }}/jaas-crowd.conf"
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_group }}"
+    mode: u=rw,g=,o=
+  notify: restart rundeck
+  when: rundeck_crowd_enable
+
+- name: Download JAAS LoginModule for Crowd into bootstrap dir
+  get_url:
+    dest: "{{ rundeck_base_dir }}/bootstrap/{{ item.split('/')|last }}"
+    url: "{{ item }}"
+  with_items: "{{ rundeck_crowd_jaas_jars }}"
+  notify:
+    - restart rundeck
+  tags:
+    - rundeck
+    - configuration
+    - crowd
+  when: rundeck_crowd_enable
+
 - name: Write static tokens
   copy:
     dest: "{{ rundeck_static_tokens_file }}"
