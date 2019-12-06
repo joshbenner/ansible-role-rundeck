@@ -4,7 +4,7 @@
     group: "{{ rundeck_group }}"
     mode: 0655
     owner: "{{ rundeck_user }}"
-    path: /var/lib/rundeck/lib
+    path: "{{ rundeck_base_dir }}/lib"
     state: directory
   tags:
     - rundeck
@@ -13,7 +13,7 @@
 
 - name: Rundeck - PostgreSQL | download postgreSQL jdbc driver
   get_url:
-    dest: "/var/lib/rundeck/lib/{{ rundeck_postgresql_driver_file }}"
+    dest: ""{{ rundeck_base_dir }}/lib"/{{ rundeck_postgresql_driver_file }}"
     url: "{{ rundeck_postgresql_driver_download }}"
     group: "{{ rundeck_group }}"
     mode: 0644
@@ -22,76 +22,4 @@
   tags:
     - rundeck
     - jdbc
-    - postgresql
-
-- name: Rundeck - PostgreSQL | update database connection in configuration
-  lineinfile:
-    dest: /etc/rundeck/rundeck-config.properties
-    regexp: "^dataSource.url"
-    line: "dataSource.url=jdbc:postgresql://{{ rundeck_database_host }}:{{ rundeck_database_port|default('5432') }}/{{ rundeck_database_name }}"
-  notify:
-    - restart rundeck
-  tags:
-    - rundeck
-    - configuration
-    - postgresql
-
-- name: Rundeck - PostgreSQL | update database driver in configuration
-  lineinfile:
-    dest: /etc/rundeck/rundeck-config.properties
-    regexp: "^dataSource.driverClassName"
-    line: "dataSource.driverClassName=org.postgresql.Driver"
-  notify:
-    - restart rundeck
-  tags:
-    - rundeck
-    - configuration
-    - postgresql
-
-- name: Rundeck - PostgreSQL | update database dialect in configuration
-  lineinfile:
-    dest: /etc/rundeck/rundeck-config.properties
-    regexp: "^dataSource.dialect"
-    line: "dataSource.dialect=org.hibernate.dialect.PostgreSQLDialect"
-  notify:
-    - restart rundeck
-  tags:
-    - rundeck
-    - configuration
-    - postgresql
-
-- name: Rundeck - PostgreSQL | update database username in configuration
-  lineinfile:
-    dest: /etc/rundeck/rundeck-config.properties
-    regexp: "^dataSource.username"
-    line: "dataSource.username={{ rundeck_database_user }}"
-  notify:
-    - restart rundeck
-  tags:
-    - rundeck
-    - configuration
-    - postgresql
-
-- name: Rundeck - PostgreSQL | update database password in configuration
-  lineinfile:
-    dest: /etc/rundeck/rundeck-config.properties
-    regexp: "^dataSource.password"
-    line: "dataSource.password={{ rundeck_database_pass }}"
-  notify:
-    - restart rundeck
-  tags:
-    - rundeck
-    - configuration
-    - postgresql
-
-- name: Rundeck - PostgreSQL | ensure database is used to store projects  # +2.5.0
-  lineinfile:
-    dest: /etc/rundeck/rundeck-config.properties
-    line: "rundeck.projectsStorageType=db"
-    state: "present"
-  notify:
-    - restart rundeck
-  tags:
-    - rundeck
-    - configuration
     - postgresql

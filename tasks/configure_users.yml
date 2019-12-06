@@ -20,7 +20,7 @@
 - name: Users | update basic security to have users
   template:
     src: realm.properties.j2
-    dest: {{ rundeck_config_dir }}/realm.properties
+    dest: "{{ rundeck_config_dir }}/realm.properties"
     owner: rundeck
     group: rundeck
   when: rundeck_users|length > 0 and rundeck_encoded_users is successful

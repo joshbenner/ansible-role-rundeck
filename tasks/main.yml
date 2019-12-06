@@ -16,6 +16,12 @@
   include_tasks: cli.yml
   when: rundeck_cli_enable
 
+- name: Configure API
+  tags:
+    - rundeck-api
+  include_tasks: api.yml
+  when: rundeck_api_enable or rundeck_projects|length > 0
+
 - name: Configure Rundeck
   import_tasks: configure.yml
 
@@ -43,3 +49,13 @@
     name: rundeckd
     state: started
     enabled: yes
+
+- name: Configure Projects
+  include_tasks: configure_projects.yml
+  when: rundeck_projects|length > 0
+  with_dict: "{{ rundeck_projects }}"
+
+# - name: Configure SCM for Projects
+#   include_tasks: configure_scm.yml
+#   when: rundeck_scm_config|length > 0
+#   with_dict: "{{ rundeck_scm_config }}"

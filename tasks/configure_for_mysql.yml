@@ -1,10 +1,10 @@
 ---
 - name: Rundeck - MySQL | make server lib directory
   file:
-    group: rundeck
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_user }}"
     mode: 0655
-    owner: rundeck
-    path: /var/lib/rundeck/lib
+    path: "{{ rundeck_base_dir }}/lib"
     state: directory
   tags:
     - rundeck
@@ -15,99 +15,50 @@
   get_url:
     dest: /tmp/mysql-connector-java-ga.tar.gz
     url: "https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.18.tar.gz"
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_user }}"
   tags:
     - rundeck
     - jdbc
+    - mysql
+
+- name: Rundeck - MySQL | create unarchive destination directory
+  file:
+    path: "/tmp/mysql-connector-java-ga/"
+    state: directory
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_user }}"
+  tags:
+    - rundeck
+    - directory
     - mysql
 
 - name: Rundeck - MySQL | unarchive jdbc driver
   unarchive:
     dest: /tmp
     src: /tmp/mysql-connector-java-ga.tar.gz
-    copy: false
+    remote_src: yes
+    extra_opts:
+      - "--directory"
+      - "/tmp/mysql-connector-java-ga/"
+      - "--strip-components"
+      - "1"
   tags:
     - rundeck
     - jdbc
     - mysql
 
 - name: Rundeck - MySQL | copy jdbc driver
-  command: mv /tmp/mysql-connector-java-ga/*.jar /var/lib/rundeck/lib/
-  args:
-    creates: /var/lib/rundeck/lib/mysql-connector-java-*
+  copy:
+    src: "{{ item }}"
+    dest: "{{ rundeck_base_dir }}/lib/"
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_user }}"
+    remote_src: yes
+    force: yes
+  with_fileglob:
+    - "/tmp/mysql-connector-java-ga/*.jar"
   tags:
     - rundeck
     - jdbc
-    - mysql
-
-- name: Rundeck - MySQL | update database connection in configuration
-  lineinfile:
-    dest: /etc/rundeck/rundeck-config.properties
-    regexp: "^dataSource.url"
-    line: "dataSource.url=jdbc:mysql://{{ rundeck_database_host }}:{{ rundeck_database_port }}/{{ rundeck_database_name }}"
-  notify:
-    - restart rundeck
-  tags:
-    - rundeck
-    - configuration
-    - mysql
-
-- name: Rundeck - MySQL | update database driver in configuration
-  lineinfile:
-    dest: /etc/rundeck/rundeck-config.properties
-    regexp: "^dataSource.driverClassName"
-    line: "dataSource.driverClassName=com.mysql.jdbc.Driver"
-  notify:
-    - restart rundeck
-  tags:
-    - rundeck
-    - configuration
-    - mysql
-
-- name: Rundeck - MySQL | update database dialect in configuration
-  lineinfile:
-    dest: /etc/rundeck/rundeck-config.properties
-    regexp: "^dataSource.dialect"
-    line: "dataSource.dialect=org.hibernate.dialect.MySQLDialect"
-  notify:
-    - restart rundeck
-  tags:
-    - rundeck
-    - configuration
-    - mysql
-
-- name: Rundeck - MySQL | update database username in configuration
-  lineinfile:
-    dest: /etc/rundeck/rundeck-config.properties
-    regexp: "^dataSource.username"
-    line: "dataSource.username={{ rundeck_database_user }}"
-  notify:
-    - restart rundeck
-  tags:
-    - rundeck
-    - configuration
-    - mysql
-
-- name: Rundeck - MySQL | update database password in configuration
-  lineinfile:
-    dest: /etc/rundeck/rundeck-config.properties
-    regexp: "^dataSource.password"
-    line: "dataSource.password={{ rundeck_database_pass }}"
-  notify:
-    - restart rundeck
-  tags:
-    - rundeck
-    - configuration
-    - mysql
-
-- name: Rundeck - MySQL | ensure database is used to store projects
-  lineinfile:
-    dest: /etc/rundeck/rundeck-config.properties
-    line: "rundeck.projectsStorageType=db"
-    state: "present"
-  when: rundeck_targeting_version.stdout|version_compare('2.5.0', '>=')
-  notify:
-    - restart rundeck
-  tags:
-    - rundeck
-    - configuration
     - mysql
