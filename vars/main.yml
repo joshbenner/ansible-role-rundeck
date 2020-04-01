@@ -62,7 +62,7 @@ _rundeck_config:
   - parameter: dataSource.dbCreate
     value: "update"
   - parameter: dataSource.url
-    value: "{{ 'jdbc:mysql://{{ rundeck_database_host }}:{{ rundeck_database_port|default(3306) }}/{{ rundeck_database_name }}' if rundeck_database_type == 'mysql' else ( 'jdbc:postgresql://{{ rundeck_database_host }}:{{ rundeck_database_port|default(5432) }}/{{ rundeck_database_name }}' if rundeck_database_type == 'postgresql' else 'jdbc:h2:file:{{ rundeck_base_dir }}/data/rundeckdb;MVCC=true') }}"
+    value: "{% if rundeck_database_type == 'mysql' %}jdbc:mysql://{{ rundeck_database_host }}:{{ rundeck_database_port|default(3306) }}/{{ rundeck_database_name }}{% else %}{% if rundeck_database_type == 'postgresql' %}jdbc:postgresql://{{ rundeck_database_host }}:{{ rundeck_database_port|default(5432) }}/{{ rundeck_database_name }}{% else %}jdbc:h2:file:{{ rundeck_base_dir }}/data/rundeckdb;MVCC=true){% endif %}{% endif %}"
   - parameter: dataSource.driverClassName
     value: "{{ 'com.mysql.jdbc.Driver' if rundeck_database_type == 'mysql' else ('org.postgresql.Driver' if rundeck_database_type == 'postgresql' else '') }}"
   - parameter: dataSource.dialect
