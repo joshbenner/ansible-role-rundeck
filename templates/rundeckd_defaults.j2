@@ -13,5 +13,9 @@ RUNDECK_WITH_SSL="true"
 LOGIN_MODULE=ldap
 JAAS_CONF={{ rundeck_config_dir }}/jaas-ldap.conf
 {% endif %}
+{% if rundeck_crowd_enable %}
+LOGIN_MODULE=crowd
+CROWD_CONF={{ rundeck_config_dir }}/jaas-crowd.conf
+{% endif %}
 
 ulimit -n {{ rundeck_open_file_limit }}

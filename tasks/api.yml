@@ -1,0 +1,75 @@
+---
+- name: Create api user
+  user:
+    name: "{{ rundeck_api_user }}"
+    state: present
+  register: _rundeck_api_user
+
+- name: Create ~/.rd directory for API user
+  file:
+    path: "{{ _rundeck_api_user.home }}/.rd/"
+    state: directory
+    owner: "{{ rundeck_api_user }}"
+    group: "{{ rundeck_api_user }}"
+    mode: u=rwx,g=,o=
+
+- name: Check for API user API token
+  stat:
+    path: "{{ _rundeck_api_user.home }}/.rd/token"
+  register: _api_token_file
+
+- name: Generate API user token
+  when:
+    - rundeck_api_auto_token
+    - not _api_token_file.stat.exists
+  block:
+    - name: Generate API user API token
+      set_fact:
+        _api_token: "{{ ansible_date_time.iso8601_micro | to_uuid | hash('sha1') }}"
+
+    - name: Write API user API token
+      copy:
+        dest: "{{ _rundeck_api_user.home }}/.rd/token"
+        content: "{{ _api_token }}"
+        owner: "{{ rundeck_api_user }}"
+        group: "{{ rundeck_api_user }}"
+        mode: u=rw,g=,o=
+
+- name: Use existing API user token
+  when:
+    - rundeck_api_auto_token
+    - _api_token_file.stat.exists
+  block:
+    - name: Read API user API token
+      slurp:
+        src: "{{ _rundeck_api_user.home }}/.rd/token"
+      register: _token_read
+
+    - name: Stash token in variable
+      set_fact:
+        _api_token: "{{ (_token_read.content | b64decode).splitlines()[0] }}"
+
+- name: Install API token ACL
+  copy:
+    dest: "{{ rundeck_config_dir }}/apiuser.aclpolicy"
+    content: "{{ rundeck_api_auto_token_acl }}"
+    owner: "{{ rundeck_api_user }}"
+    group: "{{ rundeck_group }}"
+    mode: u=r,g=r,o=
+  when:
+    - rundeck_api_auto_token
+    - rundeck_api_auto_token_acl|length
+
+- name: Remove API token ACL
+  file:
+    path: "{{ rundeck_config_dir }}/apiuser.aclpolicy"
+    state: absent
+  when: not rundeck_api_auto_token or not rundeck_api_auto_token_acl|length
+
+# - name: Configure API
+#   template:
+#     src: api.sh.j2
+#     dest: "{{ _rundeck_api_user.home }}/.rd/rd.conf"
+#     owner: "{{ rundeck_api_user }}"
+#     group: "{{ rundeck_api_user }}"
+#     mode: u=rw,g=,o=

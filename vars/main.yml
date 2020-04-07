@@ -26,7 +26,11 @@ rundeck_static_tokens_file: "{{ rundeck_config_dir }}/tokens.properties"
 _rundeck_cli_static_token:
   user: cliuser
   token: "{{ _cli_token }}"
-_rundeck_static_tokens: "{{ rundeck_static_tokens + ([_rundeck_cli_static_token] if rundeck_cli_auto_token else []) }}"
+_rundeck_api_static_token:
+  user: apiuser
+  token: "{{ _api_token }}"
+
+_rundeck_static_tokens: "{{ rundeck_static_tokens + ([_rundeck_cli_static_token] if rundeck_cli_auto_token else []) + ([_rundeck_api_static_token] if rundeck_api_auto_token else []) }}"
 
 _rundeck_standard_jvm_settings:
   - -Dserver.http.host={{ rundeck_listen_address }}
@@ -37,52 +41,85 @@ _rundeck_standard_jvm_settings:
 _rundeck_jvm_settings: "{{ rundeck_extra_jvm_settings + _rundeck_standard_jvm_settings }}"
 
 _rundeck_config:
-  rdeck:
-    base: "{{ rundeck_base_dir }}"
-  rss:
-    enabled: "{{ 'true' if rundeck_rss_enabled else 'false' }}"
-  rundeck:
-    executionMode: "{{ rundeck_execution_mode }}"
-  pagination:
-    default:
-      max: "{{ rundeck_pagination_default }}"
-  loglevel:
-    default: "{{ rundeck_loglevel_default }}"
-  grails:
-    serverURL: "{{ rundeck_external_url }}"
-  dataSource:
-    dbCreate: update
-    url: jdbc:h2:file:{{ rundeck_base_dir }}/data/rundeckdb;MVCC=true
+  - parameter: rdeck.base
+    value: "{{ rundeck_base_dir }}"
+  - parameter: rss.enabled
+    value: "{{ 'true' if rundeck_rss_enabled else 'false' }}"
+  - parameter: rundeck.executionMode
+    value: "{{ rundeck_execution_mode }}"
+  - parameter: rundeck.log4j.config.file
+    value: "{{ rundeck_config_dir }}/log4j.properties"
+  - parameter: rundeck.feature.repository.enabled
+    value: "true"
+  - parameter: rundeck.projectsStorageType
+    value: "{{ 'db' if rundeck_database_type == 'mysql' or rundeck_database_type == 'postgresql' else 'file' }}"
+  - parameter: pagination.default.max
+    value: "{{ rundeck_pagination_default }}"
+  - parameter: loglevel.default
+    value: "{{ rundeck_loglevel_default }}"
+  - parameter: grails.serverURL
+    value: "{{ rundeck_external_url }}"
+  - parameter: dataSource.dbCreate
+    value: "update"
+  - parameter: dataSource.url
+    value: "{% if rundeck_database_type == 'mysql' %}jdbc:mysql://{{ rundeck_database_host }}:{{ rundeck_database_port|default(3306) }}/{{ rundeck_database_name }}{% else %}{% if rundeck_database_type == 'postgresql' %}jdbc:postgresql://{{ rundeck_database_host }}:{{ rundeck_database_port|default(5432) }}/{{ rundeck_database_name }}{% else %}jdbc:h2:file:{{ rundeck_base_dir }}/data/rundeckdb;MVCC=true){% endif %}{% endif %}"
+  - parameter: dataSource.driverClassName
+    value: "{{ 'com.mysql.jdbc.Driver' if rundeck_database_type == 'mysql' else ('org.postgresql.Driver' if rundeck_database_type == 'postgresql' else '') }}"
+  - parameter: dataSource.dialect
+    value: "{{ 'org.hibernate.dialect.MySQLDialect' if rundeck_database_type == 'mysql' else ( 'org.hibernate.dialect.PostgreSQLDialect' if rundeck_database_type == 'postgresql' else '') }}"
+  - parameter: dataSource.username
+    value: "{{ rundeck_database_user }}"
+  - parameter: dataSource.password
+    value: "{{ rundeck_database_pass }}"
 
 _rundeck_framework:
-  rdeck:
-    base: "{{ rundeck_base_dir }}"
-  rundeck:
-    server:
-      uuid: "{{ _rundeck_uuid }}"
-      url: "{{ rundeck_external_url }}"
-    tokens:
-      file: "{{ rundeck_static_tokens_file }}"
-  framework:
-    globals: "{{ rundeck_globals }}"
-    server:
-      name: "{{ rundeck_server_name }}"
-      hostname: "{{ ansible_fqdn }}"
-      port: "{{ rundeck_https_port if rundeck_ssl_enable else rundeck_http_port }}"
-      url: "{{ rundeck_external_url }}"
-    ssh:
-      keypath: "{{ rundeck_base_dir }}/.ssh/id_rsa"
-      user: "{{ rundeck_user }}"
-      timeout: 0
-    projects:
-      dir: "{{ rundeck_projects_dir }}"
-    etc:
-      dir: "{{ rundeck_config_dir }}"
-    var:
-      dir: "{{ rundeck_base_dir }}/var"
-    tmp:
-      dir: "{{ rundeck_base_dir }}/var/tmp"
-    logs:
-      dir: "{{ rundeck_base_dir }}/logs"
-    libext:
-      dir: "{{ rundeck_base_dir }}/libext"
+  - parameter: framework.server.hostname
+    value: "{{ ansible_fqdn }}"
+  - parameter: framework.server.name
+    value: "{{ ansible_hostname }}"
+  - parameter: framework.server.port
+    value: "{{ rundeck_https_port if rundeck_ssl_enable else rundeck_http_port }}"
+  - parameter: framework.server.url
+    value: "{{ rundeck_external_url }}"
+  - parameter: framework.projects.dir
+    value: "{{ rundeck_projects_dir }}"
+  - parameter: framework.var.dir
+    value: "{{ rundeck_base_dir }}/var"
+  - parameter: framework.logs.dir
+    value: "{{ rundeck_base_dir }}/logs"
+  - parameter: framework.tmp.dir
+    value: "{{ rundeck_base_dir }}/var/tmp"
+  - parameter: framework.libext.dir
+    value: "{{ rundeck_base_dir }}/libext"
+  - parameter: framework.etc.dir
+    value: "{{ rundeck_config_dir }}"
+  # - parameter: "framework.server.username"
+  #   value: unset
+  # - parameter: "framework.server.password"
+  #   value: unset
+  - parameter: framework.rundeck.url
+    value: "{{ rundeck_external_url }}"
+  - parameter: "framework.ssh.keypath"
+    value: "{{ rundeck_base_dir }}/.ssh/id_rsa"
+  - parameter: "framework.ssh.user"
+    value: "{{ rundeck_user }}"
+  - parameter: "framework.ssh.timeout"
+    value: 0
+  - parameter: framework.ssh-connect-timeout
+    value: 0
+  - parameter: framework.ssh-command-timeout
+    value: 0
+  - parameter: "framework.globals"
+    value: "{{ rundeck_globals }}"
+  # - parameter: "framework.log.dispatch.console.format"
+  #   value: unset
+  - parameter: framework.rundeck.execution.script.tokenexpansion.enabled
+    value: true
+  - parameter: rundeck.server.uuid
+    value: "{{ _rundeck_uuid }}"
+  - parameter: rundeck.server.url
+    value: "{{ rundeck_external_url }}"
+  - parameter: rundeck.tokens.file
+    value: "{{ rundeck_static_tokens_file }}"
+  - parameter: rdeck.base
+    value: "{{ rundeck_base_dir }}"

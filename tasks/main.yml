@@ -8,15 +8,7 @@
 - name: Download plugins
   tags:
     - rundeck-plugins
-  get_url:
-    dest: "{{ rundeck_base_dir }}/libext/{{ item.url | basename }}"
-    url: "{{ item.url }}"
-    checksum: "{{ item.checksum | d(omit) }}"
-    owner: "{{ rundeck_user }}"
-    group: "{{ rundeck_group }}"
-    mode: u=rw,g=r,o=r
-  loop: "{{ rundeck_plugins }}"
-  notify: restart rundeck
+  include_tasks: plugins.yml
 
 - name: Configure CLI
   tags:
@@ -24,8 +16,26 @@
   include_tasks: cli.yml
   when: rundeck_cli_enable
 
+- name: Configure API
+  tags:
+    - rundeck-api
+  include_tasks: api.yml
+  when: rundeck_api_enable or rundeck_projects|length > 0
+
 - name: Configure Rundeck
   import_tasks: configure.yml
+
+# vendor database setup
+- name: Configure Database
+  include_tasks: configure_for_mysql.yml
+  when: rundeck_database_type == 'mysql'
+
+- name: Configure Database
+  include_tasks: configure_for_postgresql.yml
+  when: rundeck_database_type == 'postgresql'
+
+# user management
+- include_tasks: configure_users.yml
 
 # Flush first so that if a restart is pending, we don't start and immediately
 # restart upon initial install.
@@ -39,3 +49,17 @@
     name: rundeckd
     state: started
     enabled: yes
+
+- name: Add all key storage via rundeck API
+  include: configure_key_storage.yml
+  with_items: "{{ rundeck_storage }}"
+
+- name: Configure Projects
+  include_tasks: configure_projects.yml
+  when: rundeck_projects|length > 0
+  with_dict: "{{ rundeck_projects }}"
+
+# - name: Configure SCM for Projects
+#   include_tasks: configure_scm.yml
+#   when: rundeck_scm_config|length > 0
+#   with_dict: "{{ rundeck_scm_config }}"

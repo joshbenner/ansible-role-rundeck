@@ -1,0 +1,25 @@
+---
+- name: Rundeck - PostgreSQL | make server lib directory
+  file:
+    group: "{{ rundeck_group }}"
+    mode: 0655
+    owner: "{{ rundeck_user }}"
+    path: "{{ rundeck_base_dir }}/lib"
+    state: directory
+  tags:
+    - rundeck
+    - directory
+    - postgresql
+
+- name: Rundeck - PostgreSQL | download postgreSQL jdbc driver
+  get_url:
+    dest: ""{{ rundeck_base_dir }}/lib"/{{ rundeck_postgresql_driver_file }}"
+    url: "{{ rundeck_postgresql_driver_download }}"
+    group: "{{ rundeck_group }}"
+    mode: 0644
+    owner: "{{ rundeck_user }}"
+    validate_certs: false  # work around to certificate on ubuntu 14.04.
+  tags:
+    - rundeck
+    - jdbc
+    - postgresql

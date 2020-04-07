@@ -9,27 +9,68 @@
     # Used by _rundeck_framework
     _rundeck_uuid: "{{ _rundeck_get_uuid.stdout_lines[0] }}"
 
-- name: Configure Rundeck framework
+# - name: Configure Rundeck framework
+#   template:
+#     src: properties.j2
+#     dest: "{{ rundeck_config_dir }}/framework.properties"
+#     owner: "{{ rundeck_user }}"
+#     group: "{{ rundeck_group }}"
+#     mode: u=rw,g=,o=
+#   vars:
+#     properties: "{{ _rundeck_framework }}"
+#   notify: restart rundeck
+
+# - name: Configure base Rundeck settings
+#   template:
+#     src: properties.j2
+#     dest: "{{ rundeck_config_dir }}/rundeck-config.properties"
+#     owner: "{{ rundeck_user }}"
+#     group: "{{ rundeck_group }}"
+#     mode: u=rw,g=,o=
+#   vars:
+#     properties: "{{ _rundeck_config | combine(rundeck_extra_config, recursive=True) }}"
+#   notify: restart rundeck
+
+- name: Configure Rundeck log4j
   template:
-    src: properties.j2
-    dest: "{{ rundeck_config_dir }}/framework.properties"
+    src: log4j.properties
+    dest: "{{ rundeck_config_dir }}/log4j.properties"
     owner: "{{ rundeck_user }}"
     group: "{{ rundeck_group }}"
     mode: u=rw,g=,o=
-  vars:
-    properties: "{{ _rundeck_framework }}"
   notify: restart rundeck
 
-- name: Configure base Rundeck settings
-  template:
-    src: properties.j2
+- name: configure rundeck properties
+  lineinfile:
     dest: "{{ rundeck_config_dir }}/rundeck-config.properties"
-    owner: "{{ rundeck_user }}"
-    group: "{{ rundeck_group }}"
-    mode: u=rw,g=,o=
-  vars:
-    properties: "{{ _rundeck_config | combine(rundeck_extra_config, recursive=True) }}"
-  notify: restart rundeck
+    line: "{{ item.parameter }} = {{ item.value }}"
+    regexp: "^{{ item.parameter }}"
+    create: yes
+  notify:
+    - restart rundeck
+  with_items:
+    - "{{ _rundeck_config + rundeck_extra_config }}"
+  loop_control:
+    label: "{{ item.parameter }}"
+
+- name: configure rundeck framework
+  lineinfile:
+    dest: "{{ rundeck_config_dir }}/framework.properties"
+    line: "{{ item.parameter }} = {{ item.value }}"
+    regexp: "^{{ item.parameter }}"
+    create: yes
+  notify:
+    - restart rundeck
+  with_items:
+    - "{{ _rundeck_framework }}"
+  loop_control:
+    label: "{{ item.parameter }}"
+
+- name: Check that the WEB-INF/web.xml exists
+  stat:
+    path: "{{ rundeck_base_dir }}/exp/webapp/WEB-INF/web.xml"
+  register: web_inf_xml_file
+  when: rundeck_set_session_timeout
 
 - name: Set session timeout
   xml:
@@ -38,7 +79,7 @@
     value: "{{ rundeck_session_timeout|string }}"
     namespaces:
       w: http://java.sun.com/xml/ns/javaee
-  when: rundeck_set_session_timeout
+  when: rundeck_set_session_timeout and web_inf_xml_file.stat.exists == True
   notify: restart rundeck
 
 - name: Configure Rundeck service
@@ -50,6 +91,18 @@
     mode: u=rw,g=r,o=r
   notify: restart rundeck
 
+- name: Rundeck - Create projects root directory
+  file:
+    path: "{{ rundeck_projects_dir }}"
+    recurse: yes
+    owner: rundeck
+    group: rundeck
+    mode: 0740
+    state: directory
+  tags:
+    - rundeck
+    - directory
+
 - name: Configure LDAP
   template:
     src: jaas-ldap.conf.j2
@@ -59,6 +112,29 @@
     mode: u=rw,g=,o=
   notify: restart rundeck
   when: rundeck_ldap_enable
+
+- name: Configure CROWD
+  template:
+    src: jaas-crowd.conf.j2
+    dest: "{{ rundeck_config_dir }}/jaas-crowd.conf"
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_group }}"
+    mode: u=rw,g=,o=
+  notify: restart rundeck
+  when: rundeck_crowd_enable
+
+- name: Download JAAS LoginModule for Crowd into bootstrap dir
+  get_url:
+    dest: "{{ rundeck_base_dir }}/bootstrap/{{ item.split('/')|last }}"
+    url: "{{ item }}"
+  with_items: "{{ rundeck_crowd_jaas_jars }}"
+  notify:
+    - restart rundeck
+  tags:
+    - rundeck
+    - configuration
+    - crowd
+  when: rundeck_crowd_enable
 
 - name: Write static tokens
   copy:

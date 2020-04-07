@@ -1,0 +1,64 @@
+---
+- name: Rundeck - MySQL | make server lib directory
+  file:
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_user }}"
+    mode: 0655
+    path: "{{ rundeck_base_dir }}/lib"
+    state: directory
+  tags:
+    - rundeck
+    - directory
+    - mysql
+
+- name: Rundeck - MySQL | download jdbc driver
+  get_url:
+    dest: /tmp/mysql-connector-java-ga.tar.gz
+    url: "https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.18.tar.gz"
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_user }}"
+  tags:
+    - rundeck
+    - jdbc
+    - mysql
+
+- name: Rundeck - MySQL | create unarchive destination directory
+  file:
+    path: "/tmp/mysql-connector-java-ga/"
+    state: directory
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_user }}"
+  tags:
+    - rundeck
+    - directory
+    - mysql
+
+- name: Rundeck - MySQL | unarchive jdbc driver
+  unarchive:
+    dest: /tmp
+    src: /tmp/mysql-connector-java-ga.tar.gz
+    remote_src: yes
+    extra_opts:
+      - "--directory"
+      - "/tmp/mysql-connector-java-ga/"
+      - "--strip-components"
+      - "1"
+  tags:
+    - rundeck
+    - jdbc
+    - mysql
+
+- name: Rundeck - MySQL | copy jdbc driver
+  copy:
+    src: "{{ item }}"
+    dest: "{{ rundeck_base_dir }}/lib/"
+    owner: "{{ rundeck_user }}"
+    group: "{{ rundeck_user }}"
+    remote_src: yes
+    force: yes
+  with_fileglob:
+    - "/tmp/mysql-connector-java-ga/*.jar"
+  tags:
+    - rundeck
+    - jdbc
+    - mysql

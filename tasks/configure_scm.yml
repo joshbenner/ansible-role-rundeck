@@ -1,0 +1,33 @@
+---
+# WIP
+
+- name: Start rundeck
+  service:
+    name: rundeckd
+    state: started
+
+- name: Check Rundeck is up
+  wait_for:
+    port: "{{ rundeck_https_port if rundeck_ssl_enable else rundeck_http_port }}"
+    delay: 10
+    timeout: 200
+
+# Flush first so that if a restart is pending, we don't start and immediately
+# restart upon initial install.
+- name: Flush pending handlers
+  meta: flush_handlers
+
+- name: "Add SCM config for project {{ item.key }} to rundeck"
+  uri:
+    url: "{{ rundeck_external_url }}/api/31/project/{{ item.key }}/scm/import/plugin/git-import/setup?authtoken={{ _api_token }}"
+    #url: "{{ rundeck_external_url }}/api/31/project/{{ item.key }}/scm/export/plugin/git-export/setup?authtoken={{ _api_token }}"
+    status_code:
+      - 200
+      - 201
+    body_format: "json"
+    method: POST
+    body: '{ "config": {{ item.value|to_json }} }'
+  when: item is defined and item
+#  with_items: "{{ item }}"
+  loop_control:
+    loop_var: item_projects
