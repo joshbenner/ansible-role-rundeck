@@ -27,6 +27,15 @@ rundeck_external_url: http{{ 's' if rundeck_ssl_enable else '' }}://{{ ansible_f
 # Name (identity) of the Rundeck server node
 rundeck_server_name: "{{ ansible_fqdn }}"
 
+# rundeck key storage
+rundeck_storage_jasypt_encryption: mysecret
+rundeck_storage: {} # List the key storage that you want
+# rundeck_storage:
+#  - name: myname
+#  - content: mycontent
+#  - path: mypath/
+
+
 rundeck_projects: []
 # Example of projects:
     # - rundeck_projects:

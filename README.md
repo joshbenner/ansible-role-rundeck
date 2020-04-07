@@ -44,6 +44,24 @@ See `defaults/main.yml`.
     - role: joshbenner.rundeck
 ```
 
+
+# Add or Delete KEY STORAGE
+  * if you want to add a key storage, you have to update `rundeck_storage` variable. Update it on `defaults/main.yml`
+  * Example: You want to add key storage TOTO with the pass TACACS and password tutu
+```yaml
+tutu_var: "{{ tutu_var_vault }}" # add tutu on vault file, please read the README of the project for more information
+
+rundeck_storage:
+  - name: TOTO
+    content: "{{ tutu_var }}"
+    path: TACACS/
+```
+  * if you want to delete, just clean `rundeck_storage` variable and delete your key password on rundeck web
+```
+rundeck_storage: []
+```
+
+
 License
 -------
 

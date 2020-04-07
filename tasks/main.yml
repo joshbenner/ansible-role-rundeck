@@ -50,6 +50,10 @@
     state: started
     enabled: yes
 
+- name: Add all key storage via rundeck API
+  include: configure_key_storage.yml
+  with_items: "{{ rundeck_storage }}"
+
 - name: Configure Projects
   include_tasks: configure_projects.yml
   when: rundeck_projects|length > 0
