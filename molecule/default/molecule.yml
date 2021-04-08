@@ -6,15 +6,29 @@ driver:
 lint:
   name: yamllint
 platforms:
-  - name: rundeck-xenial
+  - name: rundeck.app
     image: geerlingguy/docker-ubuntu1604-ansible
     command: /lib/systemd/systemd
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     privileged: yes
+    networks:
+      - name: rundecknet
     published_ports:
-      - 0.0.0.0:4440:4440/tcp
       - 0.0.0.0:4430:4430/tcp
+      - 0.0.0.0:4440:4440/tcp
+  - name: rundeck.db
+    image: postgres:10
+    command: postgres
+    env:
+      POSTGRES_DB: rundeck
+      POSTGRES_USER: rundeck
+      POSTGRES_PASSWORD: sekrit
+      POSTGRES_HOST_AUTH_METHOD: trust
+    networks:
+      - name: rundecknet
+    published_ports:
+      - 0.0.0.0:5432:5432/tcp
 provisioner:
   name: ansible
   lint:

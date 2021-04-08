@@ -1,8 +1,9 @@
 ---
-- name: Converge
-  hosts: all
+- name: Rundeck Installation and Configuration
+  hosts: rundeck.app
+  no_log: false
   post_tasks:
-    - name: Wait for Rundeck to be up
+    - name: Wait for Rundeck service to start
       wait_for:
         port: 4430
         delay: 5
@@ -11,14 +12,21 @@
         name: ansible-test
         url: https://localhost:4430
         token: sekrit
+    - name: Create Rundeck test keyfile
+      copy:
+        dest: /tmp/test-keyfile
+        content: |
+          foobar
+    - name: Add Rundeck test keyfile
+      shell: rd keys create -t password -f /tmp/test-keyfile -p keys/test/test-keyfile
+      environment:
+        RD_API_DOWNGRADE: true
   roles:
     - role: ../../..
   vars:
-    rundeck_version: 2.11.5
+    rundeck_version: 3.3.10.20210301-1
     rundeck_cleanup_enable: true
-    rundeck_globals:
-      foo: bar
-    rundeck_session_timeout: 60
+    rundeck_globals: {}
     rundeck_ssl_enable: true
     rundeck_cli_auto_token: true
     rundeck_ssl_cert_path: /etc/ssl/localhost.crt
@@ -73,6 +81,42 @@
               - allow: '*' # allow read/create/update/delete for all /keys/* storage content
           by:
             username: test-api
+    rundeck_feature_repository_enabled: true
+    rundeck_extra_config:
+      rundeck:
+        projectsStorageType: db
+        storage:
+          converter:
+            '1':
+              type: jasypt-encryption
+              path: keys
+              config:
+                algorithm: PBEWITHSHA256AND128BITAES-CBC-BC
+                encryptorType: custom
+                password: sekrit
+                provider: BC
+          provider:
+            '1':
+              type: file
+              path: keys
+              config:
+                baseDir: /var/lib/rundeck/var/storage
+        config:
+          storage:
+            converter:
+              '1':
+                type: jasypt-encryption
+                path: projects
+                config:
+                  algorithm: PBEWITHSHA256AND128BITAES-CBC-BC
+                  encryptorType: custom
+                  password: sekrit
+                  provider: BC
+      dataSource:
+        url: jdbc:postgresql://rundeck.db/rundeck
+        driverClassName: org.postgresql.Driver
+        dbCreate: update
+        username: rundeck
     rundeck_ssh_private_key: |
       -----BEGIN RSA PRIVATE KEY-----
       MIIEogIBAAKCAQEA+GmmJH7j4CTEsHGFVuU1xZOAsjvdgunGoJQRT4Yu16f3uk5a
