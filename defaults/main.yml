@@ -70,6 +70,9 @@ rundeck_loglevel_default: INFO
 # if set to true enables RSS feeds that are public (non-authenticated)
 rundeck_rss_enabled: false
 
+# if set to true enables Rundeck's feature repository (plugin search/install)
+rundeck_feature_repository_enabled: false
+
 # Any additional config or overrides. See _rundeck_config in vars/main.yml
 rundeck_extra_config: {}
 
@@ -78,10 +81,8 @@ rundeck_globals: {}
 # myvar: myvalue
 # othervar: othervalue
 
-# Disable if you don't want to change session timeout. Might be useful if
-# installing lxml on remote host isn't desired or possible.
-rundeck_set_session_timeout: true
-rundeck_session_timeout: 30
+# Set if you want to change session timeout (Rundeck default: 3600)
+rundeck_session_timeout: 3600
 
 rundeck_listen_address: 0.0.0.0
 rundeck_http_port: 4440

@@ -3,13 +3,13 @@ import os
 import testinfra.utils.ansible_runner
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
-    os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
+    os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('rundeck.app')
 
 
 def test_rundeck_package(host):
     package = host.package('rundeck')
     assert package.is_installed
-    assert package.version == '2.11.5'
+    assert package.version == '3.3.10.20210301-1'
 
 
 def test_rundeck_service(host):
@@ -53,3 +53,16 @@ def test_raw_acl(host):
     raw_acl = host.file('/etc/rundeck/test-api.aclpolicy')
     assert raw_acl.exists
     assert 'username: test-api' in raw_acl.content
+
+
+def test_rundeck_listening(host):
+    assert host.socket('tcp://127.0.0.1:4430').is_listening
+
+
+def test_rundeck_webui_loads(host):
+    host.check_output('curl -sLk https://127.0.0.1:4430') == 'Rundeck - Login'
+
+
+def test_key_storage_file_exists(host):
+    out = host.check_output('rd keys info -p keys/test/test-keyfile')
+    assert 'Rundeck-content-type: application/x-rundeck-data-password' in out

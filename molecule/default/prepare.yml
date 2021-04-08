@@ -1,6 +1,6 @@
 ---
 - name: Prepare
-  hosts: all
+  hosts: rundeck.app
   tasks:
     - name: Install prerequisites
       apt:

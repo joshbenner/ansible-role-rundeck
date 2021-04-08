@@ -31,16 +31,6 @@
     properties: "{{ _rundeck_config | combine(rundeck_extra_config, recursive=True) }}"
   notify: restart rundeck
 
-- name: Set session timeout
-  xml:
-    path: "{{ rundeck_base_dir }}/exp/webapp/WEB-INF/web.xml"
-    xpath: /w:web-app/w:session-config/w:session-timeout
-    value: "{{ rundeck_session_timeout|string }}"
-    namespaces:
-      w: http://java.sun.com/xml/ns/javaee
-  when: rundeck_set_session_timeout
-  notify: restart rundeck
-
 - name: Configure Rundeck service
   template:
     src: rundeckd_defaults.j2

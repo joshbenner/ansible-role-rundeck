@@ -3,3 +3,5 @@ __pycache__
 .vagrant
 .molecule
 .cache
+molecule/default/pytestdebug.log
+*.sw*

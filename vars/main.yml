@@ -4,8 +4,6 @@ _rundeck_conditionl_packages:
     condition: "{{ rundeck_install_java }}"
   - name: rundeck-cli
     condition: "{{ rundeck_cli_enable }}"
-  - name: python-lxml
-    condition: "{{ rundeck_set_session_timeout }}"
   - name: openssl
     condition: "{{ rundeck_ssl_enable or rundeck_trust_certs|length }}"
 _rundeck_conditional_packages_to_install: "{{ _rundeck_conditionl_packages | selectattr('condition') | map(attribute='name') | list }}"
@@ -15,7 +13,7 @@ _rundeck_packages: "{{ [_rundeck_package] + _rundeck_conditional_packages_to_ins
 # These might become customizable in a later version of the role.
 rundeck_config_dir: /etc/rundeck
 rundeck_base_dir: /var/lib/rundeck
-rundeck_projects_dir: /var/rundeck/projects
+rundeck_projects_dir: /var/lib/rundeck/projects
 rundeck_user: rundeck
 rundeck_group: rundeck
 rundeck_ssl_dir: "{{ rundeck_config_dir }}/ssl"
@@ -37,17 +35,28 @@ _rundeck_standard_jvm_settings:
 _rundeck_jvm_settings: "{{ rundeck_extra_jvm_settings + _rundeck_standard_jvm_settings }}"
 
 _rundeck_config:
+  server:
+    servlet:
+      session:
+        timeout: "{{ rundeck_session_timeout | default(3600) }}"
   rdeck:
     base: "{{ rundeck_base_dir }}"
   rss:
     enabled: "{{ 'true' if rundeck_rss_enabled else 'false' }}"
   rundeck:
     executionMode: "{{ rundeck_execution_mode }}"
+    feature:
+      repository:
+        enabled: "{{ 'true' if rundeck_feature_repository_enabled else 'false' }}"
   pagination:
     default:
       max: "{{ rundeck_pagination_default }}"
   loglevel:
     default: "{{ rundeck_loglevel_default }}"
+  log4j:
+    configurationFile: "{{ rundeck_config_dir }}/log4j2.properties"
+  logging:
+    config: "{{ rundeck_config_dir }}/log4j2.properties"
   grails:
     serverURL: "{{ rundeck_external_url }}"
   dataSource:
