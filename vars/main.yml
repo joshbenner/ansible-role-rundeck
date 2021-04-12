@@ -27,6 +27,7 @@ _rundeck_cli_static_token:
 _rundeck_static_tokens: "{{ rundeck_static_tokens + ([_rundeck_cli_static_token] if rundeck_cli_auto_token else []) }}"
 
 _rundeck_standard_jvm_settings:
+  - -Drundeck.jetty.connector.forwarded={{ 'true' if runeck_jetty_connector_forwarded else 'false' }}
   - -Dserver.http.host={{ rundeck_listen_address }}
   - -Xmx{{ rundeck_maximum_heap_size }}
   - -Xms{{ rundeck_initial_heap_size }}
