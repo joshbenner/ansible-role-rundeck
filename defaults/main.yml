@@ -73,6 +73,9 @@ rundeck_rss_enabled: false
 # if set to true enables Rundeck's feature repository (plugin search/install)
 rundeck_feature_repository_enabled: false
 
+# Tell Jetty to honor proxy forwarded requests (e.g., to support X-Forwarded-Proto)
+runeck_jetty_connector_forwarded: true
+
 # Any additional config or overrides. See _rundeck_config in vars/main.yml
 rundeck_extra_config: {}
 
