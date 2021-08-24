@@ -12,10 +12,14 @@
   when: rundeck_install_apt_key
 
 - name: Install Rundeck apt repository
-  apt_repository:
-    repo: "{{ rundeck_apt_repo }}"
-    state: present
-    filename: rundeck
+  copy:
+    dest: /etc/apt/sources.list.d/rundeck.list
+    content: |
+      {{ rundeck_apt_repo }}
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  register: _rundeck_repo
   when: rundeck_install_apt_repo
 
 - name: Pin Rundeck package version
@@ -25,11 +29,11 @@
       Package: rundeck
       Pin: version {{ rundeck_version }}
       Pin-Priority: 1002
+    mode: u=rw,g=rw,o=r
   when: rundeck_pin_version
 
 - name: Install Rundeck
   apt:
-    name: "{{ item }}"
+    name: "{{ _rundeck_packages }}"
+    update_cache: "{{ _rundeck_repo is changed }}"
     state: present
-  # Uses with_items instead of loop to get apt optimization.
-  with_items: "{{ _rundeck_packages }}"

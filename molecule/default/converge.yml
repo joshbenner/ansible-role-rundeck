@@ -2,28 +2,15 @@
 - name: Rundeck Installation and Configuration
   hosts: rundeck.app
   no_log: false
+  roles:
+    - role: ../../..
   post_tasks:
     - name: Wait for Rundeck service to start
       wait_for:
         port: 4430
         delay: 5
-    - name: Create Rundeck project
-      rundeck_project:
-        name: ansible-test
-        url: https://localhost:4430
-        token: sekrit
-    - name: Create Rundeck test keyfile
-      copy:
-        dest: /tmp/test-keyfile
-        content: |
-          foobar
-    - name: Add Rundeck test keyfile
-      shell: rd keys create -t password -f /tmp/test-keyfile -p keys/test/test-keyfile
-      environment:
-        RD_API_DOWNGRADE: true
-  roles:
-    - role: ../../..
   vars:
+    rundeck_install_apt_transport_https: false
     rundeck_version: 3.3.10.20210301-1
     rundeck_cleanup_enable: true
     rundeck_globals: {}

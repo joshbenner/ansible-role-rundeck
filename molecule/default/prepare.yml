@@ -1,12 +1,18 @@
 ---
 - name: Prepare
   hosts: rundeck.app
+  handlers:
+    - name: update-ca-certificates
+      command: update-ca-certificates
   tasks:
     - name: Install prerequisites
       apt:
+        update_cache: true
         name:
-          - python-openssl
+          - python3-openssl
           - ca-certificates
+          - apt-transport-https
+          - curl
         state: present
 
     - name: Generate localhost private key
@@ -31,8 +37,5 @@
         remote_src: true
         src: /etc/ssl/localhost.crt
         dest: /usr/local/share/ca-certificates/localhost.crt
-      register: _cert_copy
-
-    - name: Update trusted CA certs
-      command: update-ca-certificates
-      when: _cert_copy is changed
+        mode: u=rw,g=rw,o=r
+      notify: update-ca-certificates

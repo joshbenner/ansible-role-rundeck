@@ -1,6 +1,10 @@
 ---
 - name: Get existing server UUID
-  shell: cat {{ rundeck_config_dir }}/framework.properties | grep rundeck.server.uuid | awk -F '=' '{print $2}'
+  shell: |
+    set -o pipefail &&
+    cat {{ rundeck_config_dir }}/framework.properties | grep rundeck.server.uuid | awk -F '=' '{print $2}'
+  args:
+    executable: /bin/bash
   register: _rundeck_get_uuid
   changed_when: false
 
@@ -60,6 +64,8 @@
       {% endfor %}
     owner: "{{ rundeck_user }}"
     group: "{{ rundeck_group }}"
+    mode: o=rw,g=r,o=
+
   notify: restart rundeck
 
 - name: Configure SSH

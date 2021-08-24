@@ -65,9 +65,12 @@
   tags:
     - rundeck-ssl
   shell: >-
+    set -o pipefail &&
     openssl pkcs12 -in {{ _p12_path }} -nodes -passin pass:adminadmin
     | openssl x509 -noout -fingerprint -sha256
     | awk -F '=' '{print $2}'
+  args:
+    executable: /bin/bash
   register: _p12_fingerprint
   changed_when: false
   when: _keystore_check.stat.exists
@@ -76,8 +79,11 @@
   tags:
     - rundeck-ssl
   shell: >-
+    set -o pipefail &&
     keytool -v -list -alias rundeck -keystore {{ rundeck_keystore }} -storepass adminadmin
     | grep SHA256: | awk -F 'SHA256: ' '{print $2}'
+  args:
+    executable: /bin/bash
   register: _keystore_fingerprint
   changed_when: false
   when: _keystore_check.stat.exists

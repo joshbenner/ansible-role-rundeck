@@ -1,0 +1,89 @@
+---
+- name: Verify
+  hosts: rundeck.app
+  gather_facts: false
+  tasks:
+    - name: Gather package facts
+      package_facts:
+
+    - name: Gather service facts
+      service_facts:
+
+    - name: Assert rundeck package installed
+      assert:
+        that: ansible_facts.packages.rundeck | length > 0
+
+    - name: Assert rundeck service is running
+      assert:
+        that: ansible_facts.services['rundeckd.service'].state == 'running'
+
+    - name: Read trusted cert from trust store
+      command: keytool -list -keystore /etc/rundeck/ssl/truststore -storepass adminadmin
+      register: _trusted_cert
+      changed_when: false
+
+    - name: Assert trusted cert identity
+      assert:
+        that:
+          - "'localhost' in _trusted_cert.stdout"
+          - "'rundeck' in _trusted_cert.stdout"
+
+    - name: Assert ssh key exists
+      check_mode: true
+      file:
+        path: /var/lib/rundeck/.ssh/id_rsa
+        state: file
+      register: _ssh_key_exists
+      failed_when: _ssh_key_exists is changed or _ssh_key_exists is failed
+
+    - name: Assert test-api token written to tokens file
+      check_mode: true
+      lineinfile:
+        path: /etc/rundeck/tokens.properties
+        line: 'test-api: sekrit'
+      register: _token_line
+      failed_when: _token_line is changed or _token_line is failed
+
+    - name: Read ACL file
+      slurp:
+        src: /etc/rundeck/my_policy.aclpolicy
+      register: _acl
+
+    - name: Assert ACL file content
+      vars:
+        _expected: |
+          by:
+            group: somegroup
+          context:
+            application: rundeck
+          description: A policy
+          for:
+            project:
+            - allow: read
+      assert:
+        that: _expected|trim == (_acl.content | b64decode | trim)
+
+    - name: Assert ACL file attributes
+      check_mode: true
+      file:
+        path: /etc/rundeck/my_policy.aclpolicy
+        owner: rundeck
+        group: rundeck
+        mode: u=rw,g=r,o=
+      register: _acl_attrs
+      failed_when: _acl_attrs is failed or _acl_attrs is changed
+
+    - name: Read raw ACL
+      slurp:
+        src: /etc/rundeck/test-api.aclpolicy
+      register: _testapi_acl
+
+    - name: Assert raw ACL has expected content
+      assert:
+        that: "'username: test-api' in (_testapi_acl.content|b64decode)"
+
+    - name: Confirm Rundeck listening
+      wait_for:
+        host: localhost
+        port: 4430
+        timeout: 1

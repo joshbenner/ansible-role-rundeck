@@ -34,9 +34,12 @@
   tags:
     - rundeck-trust
   shell: >-
+    set -o pipefail &&
     keytool -list -v -keystore {{ rundeck_truststore }} -storepass adminadmin
     | grep 'Alias name'
     | awk -F ': ' '{print $2}'
+  args:
+    executable: /bin/bash
   register: _truststore_aliases
   changed_when: false
 
@@ -50,4 +53,4 @@
     keystore_path: "{{ rundeck_truststore }}"
     keystore_pass: adminadmin
   loop: "{{ _truststore_aliases.stdout_lines }}"
-  when: item not in (['rundeck'] + rundeck_trust_certs.keys())
+  when: item not in (['rundeck'] + (rundeck_trust_certs.keys()|list))

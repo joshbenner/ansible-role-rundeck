@@ -5,9 +5,9 @@ rundeck_install_apt_transport_https: true
 
 # Apt repo configuration.
 rundeck_install_apt_key: true
-rundeck_apt_key_url: https://bintray.com/user/downloadSubjectPublicKey?username=bintray
+rundeck_apt_key_url: https://packages.rundeck.com/pagerduty/rundeck/gpgkey
 rundeck_install_apt_repo: true
-rundeck_apt_repo: deb https://rundeck.bintray.com/rundeck-deb /
+rundeck_apt_repo: deb https://packages.rundeck.com/pagerduty/rundeck/any/ any main
 
 # Pinning the version prevents unexpected/accidental upgrades. Pinning only
 # works if a specific version is specified using the rundeck_version variable.

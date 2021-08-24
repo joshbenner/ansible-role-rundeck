@@ -1,10 +1,11 @@
 ---
 galaxy_info:
   role_name: rundeck
+  namespace: joshbenner
   author: Josh Benner
   description: Install and configure Rundeck
   license: BSD
-  min_ansible_version: 2.5
+  min_ansible_version: '2.10'
   platforms:
     - name: Ubuntu
       versions:

@@ -38,6 +38,7 @@
     remote_src: true
     src: "{{ _cert_path }}"
     dest: "{{ _der_path }}"
+    mode: u=rw,g=r,o=
   when: _is_der
 
 - name: Check if {{ _store }} exists
@@ -50,8 +51,7 @@
 - name: Check if '{{ _cert_name }}' in truststore
   tags:
     - rundeck-trust
-  shell: >-
-    keytool -list -alias {{ _cert_name }} -keystore {{ _store }} -storepass adminadmin
+  command: keytool -list -alias {{ _cert_name }} -keystore {{ _store }} -storepass adminadmin
   register: _cert_in_store
   failed_when: false
   changed_when: _cert_in_store.rc != 0
@@ -81,7 +81,7 @@
       set_fact:
         _fp_diff: "{{ _der_fingerprint.stdout_lines[0] != _store_fingerprint.stdout_lines[0] }}"
 
-- name: Trust store does not exist
+- name: Trust store does not exist  # noqa no-handler
   tags:
     - rundeck-trust
   set_fact:
